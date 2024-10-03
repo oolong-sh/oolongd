@@ -2,28 +2,53 @@ package document
 
 import (
 	"io"
+	"os"
 	"strings"
 	"unicode"
 )
 
+// DOC:
 type Lexeme struct {
-	Lexeme   string // lexical unit
+	Lexeme   string // lexical unit (includes symbols)
 	Location int    // row location
 }
 
+// DOC:
 type Document struct {
 	Path     string
 	Contents []Lexeme
 }
 
-func ReadDocument(r io.Reader, documentPath string) (*Document, error) {
+// TODO: figure out if this is actually how I want to handle this
+func (d *Document) Text() []Lexeme {
+	return d.Contents
+}
+
+// DOC:
+func ReadDocument(documentPath string) (*Document, error) {
+	f, err := os.Open(documentPath)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	d, err := readDocument(f)
+	if err != nil {
+		return nil, err
+	}
+
+	d.Path = documentPath
+
+	return d, nil
+}
+
+func readDocument(r io.Reader) (*Document, error) {
 	content, err := io.ReadAll(r)
 	if err != nil {
 		return nil, err
 	}
 
 	out := &Document{
-		Path:     documentPath,
 		Contents: readContents(string(content)),
 	}
 
