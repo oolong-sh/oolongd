@@ -1,3 +1,3 @@
 module github.com/oolong-sh/oolong
 
-go 1.22.5
+go 1.22.7
