@@ -3,6 +3,7 @@ package linking
 // TODO:
 // - tf, idf, tf-idf functions
 // - also custom weighting based on special tags (i.e. markdown headers, bold text, latex sections)
+// - https://en.wikipedia.org/wiki/Tf%E2%80%93idf
 
 func tf(d *Document) map[string]float32 {
 	// TODO: f_td / (sum f_t'd)
