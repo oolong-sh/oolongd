@@ -1,6 +1,7 @@
 package linking
 
 import (
+	"fmt"
 	"io"
 	"os"
 )
@@ -10,8 +11,9 @@ type Document struct {
 	path   string
 	ngwgts map[string]float32 // NOTE: this may need to store more information than just weights
 
-	ngrams   []NGram // TODO: may need to be stored as map?
-	contents []token
+	// ngrams []NGram // TODO: may need to be stored as map?
+	ngrams map[string]NGram
+	tokens []token
 }
 
 // Document implementation of Note interface
@@ -37,17 +39,39 @@ func ReadDocument(documentPath string) (*Document, error) {
 
 // TODO: functions for filtering less frequent ngrams and stop-words
 
+// DOC:
 func readDocument(r io.Reader) (*Document, error) {
 	content, err := io.ReadAll(r)
 	if err != nil {
 		return nil, err
 	}
 
+	// first tokenization stage
 	out := &Document{
-		contents: tokenize(string(content)),
+		tokens: tokenize(string(content)),
+	}
+
+	// first ngram extract stage
+	out.ngrams = GenerateNGrams(out.tokens, []int{2, 3, 4})
+	for k, v := range out.ngrams {
+		fmt.Println("Key:", k, " Value: ", v)
 	}
 
 	// TODO: multi-stage tokenization and ngram calculation
 
+	// TODO: multi-document ngram merge
+
+	// update map used with interface
+	out.setWeightsMap()
+
 	return out, nil
+}
+
+// DOC:
+func (d *Document) setWeightsMap() {
+	wgts := make(map[string]float32)
+	for k, v := range d.ngrams {
+		wgts[k] = v.weight
+	}
+	d.ngwgts = wgts
 }

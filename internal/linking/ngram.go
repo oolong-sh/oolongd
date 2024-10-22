@@ -41,7 +41,7 @@ func GenerateNGrams(tokens []token, nrange []int) map[string]NGram {
 			} else {
 				ngrams[ngString] = NGram{
 					ngram:     ngString,
-					weight:    1, // TODO: probably needs to be handled elsewhere
+					weight:    float32(n), // TODO: probably needs to be handled elsewhere
 					count:     1,
 					n:         n,
 					documents: map[string]int{}, // TODO: this may not be where this should be handled

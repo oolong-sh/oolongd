@@ -14,9 +14,9 @@ func TestReadDocumentSimple(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to read document: %v", err)
 	}
-	fmt.Println("Input:", s, "Output:", doc.contents)
-	if len(doc.contents) != 2 {
-		t.Fatalf("Incorrect Document.Content length. Expected %d, got %d", 2, len(doc.contents))
+	fmt.Println("Input:", s, "Output:", doc.tokens)
+	if len(doc.tokens) != 2 {
+		t.Fatalf("Incorrect Document.Content length. Expected %d, got %d", 2, len(doc.tokens))
 	}
 
 	// basic test with newlines
@@ -26,9 +26,9 @@ func TestReadDocumentSimple(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to read document: %v", err)
 	}
-	fmt.Println("Input:", s, " Output:", doc.contents)
-	if len(doc.contents) != 2 {
-		t.Fatalf("Incorrect Document.Content length. Expected %d, got %d", 2, len(doc.contents))
+	fmt.Println("Input:", s, " Output:", doc.tokens)
+	if len(doc.tokens) != 2 {
+		t.Fatalf("Incorrect Document.Content length. Expected %d, got %d", 2, len(doc.tokens))
 	}
 
 	// test with many newlines and multiple single-line lexemes
@@ -38,8 +38,8 @@ func TestReadDocumentSimple(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to read document: %v", err)
 	}
-	fmt.Println("Input:", s, " Output:", doc.contents)
-	if len(doc.contents) != 5 {
-		t.Fatalf("Incorrect Document.Content length. Expected %d, got %d", 5, len(doc.contents))
+	fmt.Println("Input:", s, " Output:", doc.tokens)
+	if len(doc.tokens) != 5 {
+		t.Fatalf("Incorrect Document.Content length. Expected %d, got %d", 5, len(doc.tokens))
 	}
 }
