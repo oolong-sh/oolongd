@@ -1,5 +1,7 @@
 package linking
 
+import "strings"
+
 // DOC:
 type NGram struct {
 	ngram  string
@@ -19,10 +21,8 @@ type NGram struct {
 func (d *NGram) Weight() float32 { return d.weight }
 func (d *NGram) Keyword() string { return d.ngram }
 
-// TODO: ngram calculation functions
-
-// TODO: this probably needs to take in a map rather than slice of tokens
-// - update token type to store document?
+// TODO: update token type to store document and stage?
+// TODO: take in interface of options to show stage, document, stage scaling factor
 func GenerateNGrams(tokens []token, nrange []int) map[string]NGram {
 	ngrams := make(map[string]NGram)
 
@@ -33,7 +33,7 @@ func GenerateNGrams(tokens []token, nrange []int) map[string]NGram {
 
 		// TODO: probably move this to be outside loop, loop until max in nrange
 		for i := 0; i <= len(tokens)-n; i++ {
-			ngString := extractNElements(tokens[i:i+n], n)
+			ngString := joinNElements(tokens[i : i+n])
 
 			if ngram, ok := ngrams[ngString]; ok {
 				// TODO: add to documents map
@@ -53,13 +53,17 @@ func GenerateNGrams(tokens []token, nrange []int) map[string]NGram {
 	return ngrams
 }
 
-func extractNElements(nTokens []token, n int) string {
+func (ng *NGram) updateWeight() {
+	// TODO: advanced weight calculations
+	// Possible naive formula: (count * n) / (scaling_factor * tokenization_stage)
+	// - keep count of total ngrams per document?
+	//   - could be used to scale by in-document importance, but might weight against big documents
+}
+
+func joinNElements(nTokens []token) string {
 	out := ""
-	for i, t := range nTokens {
-		out += t.token
-		if i < n-1 {
-			out += " "
-		}
+	for _, t := range nTokens {
+		out = strings.Join([]string{out, t.token}, " ")
 	}
 	return out
 }
