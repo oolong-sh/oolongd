@@ -10,8 +10,8 @@ type Document struct {
 	path   string
 	ngwgts map[string]float32 // NOTE: this may need to store more information than just weights
 
-	ngrams   []NGram
-	contents []lexeme // NOTE: storing in-file locations may not be necessary -> []string
+	ngrams   []NGram // TODO: may need to be stored as map?
+	contents []token
 }
 
 // Document implementation of Note interface
@@ -34,6 +34,8 @@ func ReadDocument(documentPath string) (*Document, error) {
 
 	return d, nil
 }
+
+// TODO: functions for filtering less frequent ngrams and stop-words
 
 func readDocument(r io.Reader) (*Document, error) {
 	content, err := io.ReadAll(r)
