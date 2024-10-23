@@ -1,13 +1,15 @@
 package linking
 
 import (
+	"fmt"
 	"slices"
 	"strings"
 	"unicode"
 )
 
 // Characters excluded from special char removal stage
-var allowedSpecialChars = []rune{'\'', '"', '-'}
+// var allowedSpecialChars = []rune{'\”, '"', '-'}
+var allowedSpecialChars = []rune{'-'}
 
 // DOC:
 type token struct {
@@ -22,10 +24,12 @@ func tokenize(content string, stage int) []token {
 	out := []token{}
 	var sb strings.Builder
 	row := 0
+	hyphenFlag := false
 
 	for _, c := range content {
 		c = processChar(c, stage)
 		if c == 0 {
+			hyphenFlag = false
 			if sb.Len() > 0 {
 				out = append(out, token{
 					token:    sb.String(),
@@ -34,11 +38,23 @@ func tokenize(content string, stage int) []token {
 				sb.Reset()
 			}
 
-			// FIX: carriage returns may need to be handled to avoid incorrect row counts
+			// NOTE: carriage returns may need to be handled to avoid incorrect row counts
+			// FIX: row counter not working?
 			if c == '\n' {
 				row++
 			}
 		} else {
+			if c == '-' {
+				hyphenFlag = true
+				continue
+			}
+
+			if hyphenFlag && sb.Len() > 0 {
+				hyphenFlag = false
+				sb.WriteRune('-')
+			}
+
+			// TODO: special handling for hyphens (only allow with preceding and succeeding non-whitespace chars)
 			sb.WriteRune(c)
 		}
 	}
@@ -51,6 +67,7 @@ func tokenize(content string, stage int) []token {
 		})
 	}
 
+	fmt.Println(out)
 	return out
 }
 
