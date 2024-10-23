@@ -6,13 +6,14 @@ import (
 	"os"
 )
 
+var nGramSizes = []int{2, 3, 4, 5}
+
 // DOC:
 type Document struct {
 	path   string
 	ngwgts map[string]float32 // NOTE: this may need to store more information than just weights
 
-	// ngrams []NGram // TODO: may need to be stored as map?
-	ngrams map[string]NGram
+	ngrams map[string]*NGram
 	tokens []token
 }
 
@@ -22,13 +23,14 @@ func (d *Document) Keywords() map[string]float32 { return d.ngwgts }
 
 // DOC:
 func ReadDocument(documentPath string) (*Document, error) {
+	// TODO: remove ~/ shorthand in documentPath if present
 	f, err := os.Open(documentPath)
 	if err != nil {
 		return nil, err
 	}
 	defer f.Close()
 
-	d, err := readDocument(f)
+	d, err := readDocument(f, documentPath)
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +42,7 @@ func ReadDocument(documentPath string) (*Document, error) {
 // TODO: functions for filtering less frequent ngrams and stop-words
 
 // DOC:
-func readDocument(r io.Reader) (*Document, error) {
+func readDocument(r io.Reader, documentPath string) (*Document, error) {
 	content, err := io.ReadAll(r)
 	if err != nil {
 		return nil, err
@@ -48,20 +50,35 @@ func readDocument(r io.Reader) (*Document, error) {
 
 	// first tokenization stage
 	out := &Document{
-		tokens: tokenize(string(content)),
+		path:   documentPath,
+		tokens: tokenize(string(content), 0),
 	}
 
 	// first ngram extract stage
-	out.ngrams = GenerateNGrams(out.tokens, []int{2, 3, 4})
+	out.GenerateNGrams(nGramSizes)
+	for k, v := range out.ngrams {
+		fmt.Println("Key:", k, " Value: ", v)
+	}
+
+	// TODO: to avoid re-tokenizing, tokenizer function could take in tokens list
+	// after initial stage
+	fmt.Println("Stage 2")
+	out.tokens = tokenize(string(content), 1)
+	out.GenerateNGrams(nGramSizes)
+	for k, v := range out.ngrams {
+		fmt.Println("Key:", k, " Value: ", v)
+	}
+
+	fmt.Println("Stage 3")
+	out.tokens = tokenize(string(content), 2)
+	out.GenerateNGrams(nGramSizes)
 	for k, v := range out.ngrams {
 		fmt.Println("Key:", k, " Value: ", v)
 	}
 
 	// TODO: multi-stage tokenization and ngram calculation
 
-	// TODO: multi-document ngram merge
-
-	// update map used with interface
+	// update map for use with graph-facing interface
 	out.setWeightsMap()
 
 	return out, nil

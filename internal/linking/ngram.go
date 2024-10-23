@@ -1,6 +1,9 @@
 package linking
 
-import "strings"
+import (
+	"slices"
+	"strings"
+)
 
 // DOC:
 type NGram struct {
@@ -10,59 +13,85 @@ type NGram struct {
 	n      int
 
 	// store all documents ngram is present in and counts within the document
-	// - maps document path to count of ngram in the document
-	// NOTE: this could be changed to []int to store locations
-	documents map[string]int
-
-	// TODO: store per-weight documents here?
+	document  string
+	locations []int
 }
 
 // NGram implements Keyword interface
-func (d *NGram) Weight() float32 { return d.weight }
-func (d *NGram) Keyword() string { return d.ngram }
+func (ng *NGram) Weight() float32 { return ng.weight }
+func (ng *NGram) Keyword() string { return ng.ngram }
 
 // TODO: update token type to store document and stage?
 // TODO: take in interface of options to show stage, document, stage scaling factor
-func GenerateNGrams(tokens []token, nrange []int) map[string]NGram {
-	ngrams := make(map[string]NGram)
+func (d *Document) GenerateNGrams(nrange []int) {
+	ngrams := make(map[string]*NGram)
 
-	for _, n := range nrange {
-		if len(tokens) < n {
-			continue
-		}
+	slices.Sort(nrange)
 
-		// TODO: probably move this to be outside loop, loop until max in nrange
-		for i := 0; i <= len(tokens)-n; i++ {
-			ngString := joinNElements(tokens[i : i+n])
+	// iterate over all tokens in document
+	for i := 0; i <= len(d.tokens)-nrange[0]; i++ {
+		// iterate over each size of N
+		for _, n := range nrange {
+			if i+n > len(d.tokens) {
+				break
+			}
 
+			// get string representation of ngram string
+			ngString := joinNElements(d.tokens[i : i+n])
+			if ngString == "" {
+				continue
+			}
+
+			// check if ngram is already present in map
 			if ngram, ok := ngrams[ngString]; ok {
-				// TODO: add to documents map
 				ngram.count++
+				ngram.locations = append(ngram.locations, d.tokens[i].location)
 			} else {
-				ngrams[ngString] = NGram{
+				ngrams[ngString] = &NGram{
 					ngram:     ngString,
-					weight:    float32(n), // TODO: probably needs to be handled elsewhere
 					count:     1,
 					n:         n,
-					documents: map[string]int{}, // TODO: this may not be where this should be handled
+					document:  d.path,
+					locations: []int{d.tokens[i].location},
 				}
 			}
+
+			ngrams[ngString].updateWeight(1)
 		}
 	}
 
-	return ngrams
+	d.ngrams = ngrams
 }
 
-func (ng *NGram) updateWeight() {
+// DOC:
+func (ng *NGram) updateWeight(stage int) {
+	countWeighting := 0.8 * float32(ng.count)
+	nWeighting := 0.3 * float32(ng.n)
+	stageWeighting := 0.5 * (float32(stage) + 0.01)
+
 	// TODO: advanced weight calculations
 	// Possible naive formula: (count * n) / (scaling_factor * tokenization_stage)
 	// - keep count of total ngrams per document?
 	//   - could be used to scale by in-document importance, but might weight against big documents
+	ng.weight = (countWeighting + nWeighting) / (stageWeighting)
 }
 
+// DOC:
 func joinNElements(nTokens []token) string {
 	out := ""
+
+	// check for outer stop words -> skip ngram
+	if slices.Contains(stopWords, nTokens[0].token) ||
+		slices.Contains(stopWords, nTokens[len(nTokens)-1].token) {
+		return out
+	}
+	// CHANGE: tokenizer needs some way of indicating where special chars were
+	// - need to know to use them as stop chars in many cases?
+	// - also needs to disallow hyphens if they aren't directly surrounded by other valid chars
+
 	for _, t := range nTokens {
+		// TODO: handle stop words (but allow in the middle of the word)
+		// - make number of stopwords count toward the weight negatively?
 		out = strings.Join([]string{out, t.token}, " ")
 	}
 	return out

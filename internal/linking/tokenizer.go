@@ -1,9 +1,13 @@
 package linking
 
 import (
+	"slices"
 	"strings"
 	"unicode"
 )
+
+// Characters excluded from special char removal stage
+var allowedSpecialChars = []rune{'\'', '"', '-'}
 
 // DOC:
 type token struct {
@@ -14,13 +18,14 @@ type token struct {
 // DOC:
 // TODO: add multiple stages (probably as a param -> int level)
 // - (i.e. don't remove capitalization or header tags the first time)
-func tokenize(content string) []token {
+func tokenize(content string, stage int) []token {
 	out := []token{}
 	var sb strings.Builder
 	row := 0
 
 	for _, c := range content {
-		if unicode.IsSpace(c) {
+		c = processChar(c, stage)
+		if c == 0 {
 			if sb.Len() > 0 {
 				out = append(out, token{
 					token:    sb.String(),
@@ -28,14 +33,12 @@ func tokenize(content string) []token {
 				})
 				sb.Reset()
 			}
-			// TODO: case switch here for tokenization stage (add param)
 
 			// FIX: carriage returns may need to be handled to avoid incorrect row counts
 			if c == '\n' {
 				row++
 			}
 		} else {
-			// base case where we want to keep the character
 			sb.WriteRune(c)
 		}
 	}
@@ -49,4 +52,32 @@ func tokenize(content string) []token {
 	}
 
 	return out
+}
+
+// DOC:
+func processChar(c rune, stage int) rune {
+	if unicode.IsSpace(c) {
+		return 0
+	}
+
+	// stage 0
+	if stage == 0 {
+		return c
+	}
+
+	// stage 1+
+	if stage > 0 {
+		c = unicode.ToLower(c)
+	}
+
+	// stage 2+
+	if stage > 1 {
+		if unicode.IsLetter(c) || unicode.IsNumber(c) || slices.Contains(allowedSpecialChars, c) {
+			c = unicode.ToLower(c)
+		} else {
+			return 0
+		}
+	}
+
+	return c
 }
