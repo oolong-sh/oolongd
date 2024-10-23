@@ -9,7 +9,7 @@ import (
 
 // Characters excluded from special char removal stage
 // var allowedSpecialChars = []rune{'\”, '"', '-'}
-var allowedSpecialChars = []rune{'-'}
+var allowedSpecialChars = []rune{'-', '_', '\''}
 
 // DOC:
 type token struct {

@@ -15,5 +15,5 @@ var stopWords = []string{
 	"this", "those", "through", "to", "too", "under", "until", "up", "ve",
 	"very", "was", "wasn", "we", "were", "what", "when", "where", "which",
 	"while", "who", "whom", "why", "will", "with", "won", "would", "y",
-	"you", "your", "yours", "yourself", "yourselves",
+	"you", "your", "yours", "yourself", "yourselves", "is",
 }
