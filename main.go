@@ -9,7 +9,8 @@ import (
 func main() {
 	fmt.Println("todo")
 
-	d, err := linking.ReadDocument("/home/patrick/notes/todo.md")
+	d, err := linking.ReadNotesDir("/home/patrick/notes/")
+	// d, err := linking.ReadDocument("/home/patrick/notes/todo.md")
 	if err != nil {
 		return
 	}

@@ -1,5 +1,7 @@
 package linking
 
+const breakToken = "__BREAK__"
+
 // TODO: add more stop words
 var stopWords = []string{
 	"a", "an", "and", "are", "as", "at", "be", "by", "for", "from", "has",

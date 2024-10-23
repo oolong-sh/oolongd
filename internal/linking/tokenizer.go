@@ -26,8 +26,8 @@ func tokenize(content string, stage int) []token {
 	row := 0
 	hyphenFlag := false
 
-	for _, c := range content {
-		c = processChar(c, stage)
+	for _, char := range content {
+		c := processChar(char, stage)
 		if c == 0 {
 			hyphenFlag = false
 			if sb.Len() > 0 {
@@ -39,8 +39,15 @@ func tokenize(content string, stage int) []token {
 			}
 
 			// NOTE: carriage returns may need to be handled to avoid incorrect row counts
-			// FIX: row counter not working?
-			if c == '\n' {
+			if char == '\n' {
+				// add break token upon finding a new line
+				out = append(out, token{
+					token:    breakToken,
+					location: row,
+				})
+				// TODO: append some sort of stop token on newlines (<BREAK>?)
+				//   - newlines should break ngram sequences
+				// - also handle in ngram functions
 				row++
 			}
 		} else {
@@ -54,7 +61,6 @@ func tokenize(content string, stage int) []token {
 				sb.WriteRune('-')
 			}
 
-			// TODO: special handling for hyphens (only allow with preceding and succeeding non-whitespace chars)
 			sb.WriteRune(c)
 		}
 	}

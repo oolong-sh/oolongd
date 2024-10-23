@@ -83,16 +83,22 @@ func joinNElements(nTokens []token) string {
 	// check for outer stop words -> skip ngram
 	if slices.Contains(stopWords, nTokens[0].token) ||
 		slices.Contains(stopWords, nTokens[len(nTokens)-1].token) {
-		return out
+		return ""
 	}
-	// CHANGE: tokenizer needs some way of indicating where special chars were
-	// - need to know to use them as stop chars in many cases?
-	// - also needs to disallow hyphens if they aren't directly surrounded by other valid chars
 
 	for _, t := range nTokens {
+		// return early if tokens slice contains break sequence
+		if t.token == breakToken {
+			return ""
+		}
+
 		// TODO: handle stop words (but allow in the middle of the word)
 		// - make number of stopwords count toward the weight negatively?
 		out = strings.Join([]string{out, t.token}, " ")
 	}
 	return out
 }
+
+// TODO: add smart filtering system for tokens
+// - need to be able to filter out noisy tokens
+// - could use some sort of ml validation or a dictionary
