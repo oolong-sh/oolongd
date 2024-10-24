@@ -3,11 +3,12 @@ package main
 import (
 	"fmt"
 
+	"github.com/oolong-sh/oolong/internal/config"
 	"github.com/oolong-sh/oolong/internal/linking"
 )
 
 func main() {
-	fmt.Println("todo")
+	config.Setup("./config.lua")
 
 	d, err := linking.ReadNotesDir("/home/patrick/notes/")
 	// d, err := linking.ReadDocument("/home/patrick/notes/todo.md")
@@ -15,4 +16,8 @@ func main() {
 		return
 	}
 	_ = d
+
+	x := config.Config()
+	x.NGramRange = append(x.NGramRange, 1)
+	fmt.Println(config.Config().NGramRange)
 }
