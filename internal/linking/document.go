@@ -23,7 +23,6 @@ func (d *Document) Keywords() map[string]float32 { return d.ngwgts }
 
 // DOC:
 func ReadDocument(documentPath string) (*Document, error) {
-	// TODO: remove ~/ shorthand in documentPath if present
 	f, err := os.Open(documentPath)
 	if err != nil {
 		return nil, err

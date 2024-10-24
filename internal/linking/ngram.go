@@ -21,7 +21,7 @@ type NGram struct {
 func (ng *NGram) Weight() float32 { return ng.weight }
 func (ng *NGram) Keyword() string { return ng.ngram }
 
-// TODO: update token type to store document and stage?
+// TODO: update token type to store stage?
 // TODO: take in interface of options to show stage, document, stage scaling factor
 func (d *Document) GenerateNGrams(nrange []int) {
 	ngrams := make(map[string]*NGram)
