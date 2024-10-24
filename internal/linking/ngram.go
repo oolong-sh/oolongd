@@ -7,7 +7,8 @@ import (
 
 // DOC:
 type NGram struct {
-	ngram  string
+	ngram string
+	// FIX: add another weight field for weight across all documents
 	weight float32 // weight of NGram across all documents
 	count  int     // count across all documents  NOTE: possibly replace this with a map of ngram->int
 	n      int
@@ -18,7 +19,7 @@ type NGram struct {
 }
 
 // NGram implements Keyword interface
-func (ng *NGram) Weight() float32 { return ng.weight }
+func (ng *NGram) Weight() float32 { return ng.weight } // FIX: should return weight across documents
 func (ng *NGram) Keyword() string { return ng.ngram }
 
 // TODO: update token type to store stage?
