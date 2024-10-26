@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/oolong-sh/oolong/internal/config"
-	"github.com/oolong-sh/oolong/internal/linking"
 	"github.com/oolong-sh/oolong/pkg/plugin"
 )
 
@@ -15,11 +14,11 @@ func main() {
 		return
 	}
 
-	d, err := linking.ReadNotesDir("/home/patrick/notes/")
-	if err != nil {
-		return
-	}
-	_ = d
+	// d, err := linking.ReadNotesDir("/home/patrick/notes/")
+	// if err != nil {
+	// 	return
+	// }
+	// _ = d
 
 	plugin.InitPlugins(&cfg)
 }

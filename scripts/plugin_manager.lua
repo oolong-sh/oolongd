@@ -2,11 +2,6 @@ local plugins = {}
 local event_handlers = {}
 local timers = {}
 
-local plugin_paths = {
-    daily_note = "./scripts/daily_note.lua",
-    event_plugin = "./scripts/event_plugin.lua",
-}
-
 local function loadPlugin(name, plugin_path)
     local plugin = dofile(plugin_path)
     if plugin and type(plugin.run) == "function" then
@@ -23,8 +18,8 @@ local function loadPlugin(name, plugin_path)
     end
 end
 
-function LoadPlugins()
-    for name, path in pairs(plugin_paths) do
+function LoadPlugins(...)
+    for name, path in pairs(arg) do
         loadPlugin(name, path)
     end
 end
