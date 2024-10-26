@@ -5,27 +5,29 @@ import (
 	"path/filepath"
 )
 
-type oolongConfig struct {
-	NGramRange []int
+type OolongConfig struct {
+	NGramRange  []int
+	PluginPaths []string
 }
 
-var config oolongConfig
+var config OolongConfig
+
+func Config() OolongConfig { return config }
 
 // TODO: figure out if this should return a mutable pointer or not
 // (probably not, use hot reloading based on file modifications)
-func Config() *oolongConfig {
-	return &config
-}
 
 // CHANGE: possibly use an init method to set this up
 // TODO: this function should reload config if it changes
 // - watch all entries in .config dir
-func Setup(configDir string) error {
-	config = oolongConfig{
-		NGramRange: []int{2, 3, 4},
+func Setup(configDir string) (OolongConfig, error) {
+	// TODO: Read plugins
+	config = OolongConfig{
+		NGramRange:  []int{2, 3, 4},
+		PluginPaths: []string{"./scripts/daily_note.lua", "./scripts/event_plugin.lua"},
 	}
 	// TODO: read config information from lua
-	return nil
+	return config, nil
 }
 
 func initWatcher(configDir string) error {

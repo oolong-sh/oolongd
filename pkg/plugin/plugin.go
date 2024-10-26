@@ -1,45 +1,40 @@
 package plugin
 
 import (
-	"errors"
 	"fmt"
 	"time"
 
-	"github.com/Shopify/go-lua"
+	"github.com/oolong-sh/oolong/internal/config"
 )
 
-// TODO:
-type Plugin struct {
-}
-
-func AddPlugin() error {
-	// TODO:
-	return nil
-}
-
-// CHANGE: remove this later, replace with a better implementation
-func LuaPlugin() error {
-	l := lua.NewState()
-	lua.OpenLibraries(l)
-
-	if err := lua.DoFile(l, "./scripts/daily-note.lua"); err != nil {
-		return err
+func InitPlugins(cfg *config.OolongConfig) {
+	pm, err := NewPluginManager()
+	if err != nil {
+		fmt.Println("Error initializing plugin manager:", err)
+		return
 	}
-	l.Global("CreateDailyNote")
-	if !l.IsFunction(-1) {
-		return errors.New("CreateDailyNote is not a function")
-	}
-	date := time.Now().Format("01-02-06")
-	l.PushString(date)
-	if err := l.ProtectedCall(1, 1, 0); err != nil {
-		return err
-	}
-	res, ok := l.ToString(-1)
-	if !ok {
-		return errors.New("Failed to convert result to string.")
+	defer pm.LuaState.Close()
+
+	pm.LoadPlugins(cfg.PluginPaths)
+	if err != nil {
+		fmt.Println("Error loading plugins:", err)
+		return
 	}
 
-	fmt.Println(res)
+	err = pm.TriggerEvent("dailyNoteEvent")
+	if err != nil {
+		fmt.Println("Error triggering daily note event:", err)
+		return
+	}
 
-	return nil
+	// start an event loop in a separate goroutine (act as a daemon)
+	go pm.StartEventLoop()
+
+	err = pm.TriggerEvent("customEvent", "example data")
+	if err != nil {
+		fmt.Println("Error triggering event:", err)
+	}
+
+	time.Sleep(5 * time.Second)
+	pm.StopEventLoop()
 }

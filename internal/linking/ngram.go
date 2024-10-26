@@ -9,11 +9,11 @@ import (
 type NGram struct {
 	ngram string
 	// FIX: add another weight field for weight across all documents
-	weight float32 // weight of NGram across all documents
+	weight float32 // weight of within a single documents NOTE: need one across documents
 	count  int     // count across all documents  NOTE: possibly replace this with a map of ngram->int
 	n      int
 
-	// store all documents ngram is present in and counts within the document
+	// TODO: store all documents ngram is present in and counts within the document
 	document  string
 	locations []int
 }
