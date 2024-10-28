@@ -6,8 +6,9 @@ import (
 )
 
 type OolongConfig struct {
-	NGramRange  []int
-	PluginPaths []string
+	NotesDirPaths []string
+	NGramRange    []int
+	PluginPaths   []string
 }
 
 var config OolongConfig
@@ -23,8 +24,9 @@ func Config() OolongConfig { return config }
 func Setup(configDir string) (OolongConfig, error) {
 	// TODO: Read plugins
 	config = OolongConfig{
-		NGramRange:  []int{2, 3, 4},
-		PluginPaths: []string{"./scripts/daily_note.lua", "./scripts/event_plugin.lua"},
+		NGramRange:    []int{2, 3, 4},
+		PluginPaths:   []string{"./scripts/daily_note.lua", "./scripts/event_plugin.lua"},
+		NotesDirPaths: []string{"/home/patrick/notes"},
 	}
 	// TODO: read config information from lua
 	return config, nil

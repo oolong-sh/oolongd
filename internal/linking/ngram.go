@@ -3,6 +3,8 @@ package linking
 import (
 	"slices"
 	"strings"
+
+	"github.com/oolong-sh/oolong/internal/linking/lexer"
 )
 
 // DOC:
@@ -15,7 +17,7 @@ type NGram struct {
 
 	// TODO: store all documents ngram is present in and counts within the document
 	document  string
-	locations []int
+	locations [][2]int
 }
 
 // NGram implements Keyword interface
@@ -46,14 +48,14 @@ func (d *Document) GenerateNGrams(nrange []int) {
 			// check if ngram is already present in map
 			if ngram, ok := ngrams[ngString]; ok {
 				ngram.count++
-				ngram.locations = append(ngram.locations, d.tokens[i].location)
+				ngram.locations = append(ngram.locations, d.tokens[i].Location)
 			} else {
 				ngrams[ngString] = &NGram{
 					ngram:     ngString,
 					count:     1,
 					n:         n,
 					document:  d.path,
-					locations: []int{d.tokens[i].location},
+					locations: [][2]int{d.tokens[i].Location},
 				}
 			}
 
@@ -78,24 +80,24 @@ func (ng *NGram) updateWeight(stage int) {
 }
 
 // DOC:
-func joinNElements(nTokens []token) string {
+func joinNElements(nTokens []lexer.Lexeme) string {
 	out := ""
 
 	// check for outer stop words -> skip ngram
-	if slices.Contains(stopWords, nTokens[0].token) ||
-		slices.Contains(stopWords, nTokens[len(nTokens)-1].token) {
+	if slices.Contains(stopWords, nTokens[0].Value) ||
+		slices.Contains(stopWords, nTokens[len(nTokens)-1].Value) {
 		return ""
 	}
 
 	for _, t := range nTokens {
 		// return early if tokens slice contains break sequence
-		if t.token == breakToken {
+		if t.Value == lexer.BreakToken {
 			return ""
 		}
 
 		// TODO: handle stop words (but allow in the middle of the word)
 		// - make number of stopwords count toward the weight negatively?
-		out = strings.Join([]string{out, t.token}, " ")
+		out = strings.Join([]string{out, t.Value}, " ")
 	}
 	return out
 }

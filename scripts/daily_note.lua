@@ -23,6 +23,8 @@ local function createDailyNote()
     f:write("# Daily Note - ", date, "\n\n")
     f:close()
 
+    print("Created daily note '" .. notePath .. "'")
+
     return notePath
 end
 

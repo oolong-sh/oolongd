@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+
+	"github.com/oolong-sh/oolong/internal/linking/lexer"
 )
 
 // TODO: multi-document read
@@ -56,6 +58,32 @@ func ReadNotesDir(notesDirPaths ...string) ([]*Document, error) {
 			}
 			documents = append(documents, doc)
 		}
+	}
+
+	// write out tokens
+	b := []byte{}
+	for _, d := range documents {
+		for _, t := range d.tokens {
+			if t.Value == lexer.BreakToken {
+				continue
+			}
+			b = append(b, []byte(t.Lemma+", "+t.Value+"\n")...)
+		}
+	}
+	err := os.WriteFile("./tokens.txt", b, 0666)
+	if err != nil {
+		panic(err)
+	}
+
+	b = []byte{}
+	for _, d := range documents {
+		for _, ng := range d.ngrams {
+			b = append(b, []byte(ng.ngram+"\n")...)
+		}
+	}
+	err = os.WriteFile("./ngrams.txt", b, 0666)
+	if err != nil {
+		panic(err)
 	}
 
 	return documents, nil

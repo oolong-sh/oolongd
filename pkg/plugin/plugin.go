@@ -35,6 +35,6 @@ func InitPlugins(cfg *config.OolongConfig) {
 		fmt.Println("Error triggering event:", err)
 	}
 
-	time.Sleep(5 * time.Second)
+	time.Sleep(2 * time.Second)
 	pm.StopEventLoop()
 }

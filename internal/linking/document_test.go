@@ -5,7 +5,20 @@ import (
 	"slices"
 	"strings"
 	"testing"
+
+	"github.com/oolong-sh/oolong/internal/config"
+	"github.com/oolong-sh/oolong/internal/linking/lexer"
 )
+
+var cfg config.OolongConfig
+
+func init() {
+	var err error
+	cfg, err = config.Setup("")
+	if err != nil {
+		panic(err)
+	}
+}
 
 func TestReadDocumentSimple(t *testing.T) {
 	// Basic test
@@ -19,13 +32,13 @@ func TestReadDocumentSimple(t *testing.T) {
 	if len(doc.tokens) != 2 {
 		t.Fatalf("Incorrect Document.Content length. Expected %d, got %d\n", 2, len(doc.tokens))
 	}
-	expectedTokens := []token{
+	expectedTokens := []lexer.Lexeme{
 		{
-			token:    "hello",
-			location: 0,
+			Value:    "hello",
+			Location: [2]int{0, 0},
 		}, {
-			token:    "world",
-			location: 0,
+			Value:    "world",
+			Location: [2]int{0, 6},
 		},
 	}
 	if !slices.Equal(doc.tokens, expectedTokens) {
@@ -43,18 +56,18 @@ func TestReadDocumentSimple(t *testing.T) {
 	if len(doc.tokens) != 3 {
 		t.Fatalf("Incorrect Document.tokens length. Expected %d, got %d", 2, len(doc.tokens))
 	}
-	expectedTokens = []token{
+	expectedTokens = []lexer.Lexeme{
 		{
-			token:    "hello",
-			location: 0,
+			Value:    "hello",
+			Location: 0,
 		},
 		{
-			token:    breakToken,
-			location: 0,
+			Value:    lexer.BreakToken,
+			Location: 0,
 		},
 		{
-			token:    "world",
-			location: 1,
+			Value:    "world",
+			Location: 1,
 		},
 	}
 	if !slices.Equal(doc.tokens, expectedTokens) {
