@@ -15,7 +15,10 @@ import (
 var allowedSpecialChars = []rune{'-', '_', '\''}
 
 type Lexer struct {
-	br    *bufio.Reader
+	br *bufio.Reader
+
+	r     rune
+	width int
 	pos   int
 	start int
 	row   int
@@ -41,52 +44,52 @@ func New() *Lexer {
 // DOC:
 // NOTE: could rewrite with regex instead of hardcoded special cases
 func (l *Lexer) Lex(r io.Reader, stage int) error {
-	hyphenFlag := false // REFACTOR: remove
-
 	l.br = bufio.NewReader(r)
 
 	var err error
-	l.lemmatizer, err = golem.New(en.New())
+	lemmatizer, err := golem.New(en.New())
 	if err != nil {
 		return fmt.Errorf("failed to initialize lemmatizer: %v", err)
 	}
+	l.lemmatizer = lemmatizer
 
 	for {
-		r, _, err := l.br.ReadRune()
-		if err != nil {
-			if err == io.EOF {
-				break
-			}
-			return err
+		r := l.next()
+		if r == eof {
+			break
 		}
 
+		// REFACTOR: change to switch case, possibly use state machine
 		c := processChar(r, stage)
 		if c == 0 {
-			// REFACTOR: change hyphenflag to a peek/lookback system
-			// - would help with special char handling, particularly with uris
-			hyphenFlag = false
 			if l.sb.Len() > 0 {
 				l.push(Word)
-				l.sb.Reset()
+				// REFACTOR:
+				// l.sb.Reset()
+				l.ignore()
 			}
 
 			if r == '\n' {
-				// TODO: call push
+				// TODO: call push correctly
 				l.push(Break)
 				l.row++
 			}
 		} else {
+			// TODO: replace with peek
 			if c == '-' {
-				hyphenFlag = true
-				continue
+				n := l.peek()
+				switch {
+				case n == eof:
+					l.width = 1
+					l.backup()
+					l.width = 0
+					// t = Symbol
+				case unicode.IsLetter(n):
+					l.accept()
+				}
+			} else {
+				l.accept()
 			}
-
-			if hyphenFlag && l.sb.Len() > 0 {
-				hyphenFlag = false
-				l.sb.WriteRune('-')
-			}
-
-			l.sb.WriteRune(c)
 		}
 	}
 

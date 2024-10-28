@@ -35,10 +35,10 @@ func TestReadDocumentSimple(t *testing.T) {
 	expectedTokens := []lexer.Lexeme{
 		{
 			Value:    "hello",
-			Location: [2]int{0, 0},
+			Location: [2]int{1, 1},
 		}, {
 			Value:    "world",
-			Location: [2]int{0, 6},
+			Location: [2]int{1, 7},
 		},
 	}
 	if !slices.Equal(doc.tokens, expectedTokens) {
@@ -59,15 +59,15 @@ func TestReadDocumentSimple(t *testing.T) {
 	expectedTokens = []lexer.Lexeme{
 		{
 			Value:    "hello",
-			Location: 0,
+			Location: [2]int{1, 1},
 		},
 		{
 			Value:    lexer.BreakToken,
-			Location: 0,
+			Location: [2]int{1, 8},
 		},
 		{
 			Value:    "world",
-			Location: 1,
+			Location: [2]int{2, 1},
 		},
 	}
 	if !slices.Equal(doc.tokens, expectedTokens) {

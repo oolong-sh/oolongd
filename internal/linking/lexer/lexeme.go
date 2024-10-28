@@ -2,17 +2,17 @@ package lexer
 
 var BreakToken = "__BREAK__"
 
-type lexType byte
+type LexType byte
 
 const (
-	EOF lexType = iota
+	EOF LexType = iota
 	Word
 	URI
 	Time
 	Date
 	Number
 	Symbol
-	Puntuation
+	Punctuation
 	Space
 	Break
 )
@@ -22,4 +22,5 @@ type Lexeme struct {
 	Lemma    string
 	Value    string
 	Location [2]int // location (useful for potential LSP implementation)
+	LexType  LexType
 }
