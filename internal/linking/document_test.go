@@ -34,15 +34,19 @@ func TestReadDocumentSimple(t *testing.T) {
 	}
 	expectedTokens := []lexer.Lexeme{
 		{
-			Value:    "hello",
-			Location: [2]int{1, 1},
+			Value:   "hello",
+			Row:     1,
+			Col:     1,
+			LexType: lexer.Word,
 		}, {
-			Value:    "world",
-			Location: [2]int{1, 7},
+			Value:   "world",
+			Row:     1,
+			Col:     7,
+			LexType: lexer.Word,
 		},
 	}
 	if !slices.Equal(doc.tokens, expectedTokens) {
-		t.Fatalf("Incorrect order in output tokens slice. Expected %+v, got %+v\n", doc.tokens, expectedTokens)
+		t.Fatalf("Unexepcted lexer output. Expected %+v, got %+v\n", expectedTokens, doc.tokens)
 	}
 
 	// basic test with newlines (should contain `breakToken`)
@@ -58,20 +62,26 @@ func TestReadDocumentSimple(t *testing.T) {
 	}
 	expectedTokens = []lexer.Lexeme{
 		{
-			Value:    "hello",
-			Location: [2]int{1, 1},
+			Value:   "hello",
+			Row:     1,
+			Col:     1,
+			LexType: lexer.Word,
 		},
 		{
-			Value:    lexer.BreakToken,
-			Location: [2]int{1, 8},
+			Value:   lexer.BreakToken,
+			Row:     1,
+			Col:     8,
+			LexType: lexer.Break,
 		},
 		{
-			Value:    "world",
-			Location: [2]int{2, 1},
+			Value:   "world",
+			Row:     2,
+			Col:     1,
+			LexType: lexer.Word,
 		},
 	}
 	if !slices.Equal(doc.tokens, expectedTokens) {
-		t.Fatalf("Incorrect order in output tokens slice. Expected %+v, got %+v\n", doc.tokens, expectedTokens)
+		t.Fatalf("Unexepcted lexer output. Expected %+v, got %+v\n", expectedTokens, doc.tokens)
 	}
 
 	// test with many newlines and multiple single-line lexemes

@@ -32,12 +32,18 @@ type Lexer struct {
 
 // DOC:
 func New() *Lexer {
+	lemmatizer, err := golem.New(en.New())
+	if err != nil {
+		panic(fmt.Sprintf("failed to initialize lemmatizer: %v", err))
+	}
+
 	return &Lexer{
-		pos:    1,
-		start:  1,
-		row:    1,
-		col:    1,
-		Output: []Lexeme{},
+		pos:        1,
+		start:      1,
+		row:        1,
+		col:        1,
+		lemmatizer: lemmatizer,
+		Output:     []Lexeme{},
 	}
 }
 
@@ -46,21 +52,29 @@ func New() *Lexer {
 func (l *Lexer) Lex(r io.Reader, stage int) error {
 	l.br = bufio.NewReader(r)
 
-	var err error
-	lemmatizer, err := golem.New(en.New())
-	if err != nil {
-		return fmt.Errorf("failed to initialize lemmatizer: %v", err)
-	}
-	l.lemmatizer = lemmatizer
-
 	for {
 		r := l.next()
 		if r == eof {
 			break
 		}
 
-		// REFACTOR: change to switch case, possibly use state machine
+		// TODO: figure out where lowercasing should be happening
 		c := processChar(r, stage)
+
+		// switch {
+		// case unicode.IsSpace(r):
+		// 	// TODO:
+		// case unicode.IsDigit(r):
+		// 	// TODO:
+		// case r == ':':
+		// 	// TODO:
+		// case unicode.IsPunct(r):
+		// 	// TODO:
+		// case unicode.IsSymbol(r):
+		// 	// TODO:
+		// }
+
+		// REFACTOR: change to switch case, possibly use a state machine
 		if c == 0 {
 			if l.sb.Len() > 0 {
 				l.push(Word)

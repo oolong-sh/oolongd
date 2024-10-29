@@ -19,8 +19,9 @@ const (
 
 // DOC:
 type Lexeme struct {
-	Lemma    string
-	Value    string
-	Location [2]int // location (useful for potential LSP implementation)
-	LexType  LexType
+	Lemma   string
+	Value   string
+	Row     int
+	Col     int
+	LexType LexType
 }

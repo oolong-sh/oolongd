@@ -1,6 +1,7 @@
 package linking
 
 import (
+	"fmt"
 	"io"
 	"os"
 
@@ -46,6 +47,7 @@ func readDocument(r io.Reader, documentPath string) (*Document, error) {
 	initStage := 3
 
 	l := lexer.New()
+	fmt.Printf("Running lexer on %s...\n", documentPath)
 	if err := l.Lex(r, initStage); err != nil {
 		return nil, err
 	}
@@ -55,6 +57,7 @@ func readDocument(r io.Reader, documentPath string) (*Document, error) {
 		tokens: l.Output,
 	}
 
+	fmt.Printf("Generating NGrams for %s...\n", documentPath)
 	out.GenerateNGrams(nGramSizes)
 
 	// for k, v := range out.ngrams {

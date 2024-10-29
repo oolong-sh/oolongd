@@ -1,8 +1,7 @@
-// Lexer is heavily inspired by chewxy's lexer: https://github.com/chewxy/lingo/blob/master/lexer/stateFn.go
+// Lexer is heavily inspired by chewxy's lexer from the lingo project: https://github.com/chewxy/lingo/blob/master/lexer/stateFn.go
 package lexer
 
 import (
-	"fmt"
 	"io"
 )
 
@@ -12,21 +11,24 @@ func (l *Lexer) push(v LexType) {
 	switch v {
 	case Break:
 		l.Output = append(l.Output, Lexeme{
-			Value:    BreakToken,
-			Location: [2]int{l.row, l.col},
+			Value:   BreakToken,
+			Row:     l.row,
+			Col:     l.col,
+			LexType: Break,
 		})
 	case Word:
 		word := l.sb.String()
 		lemma := l.lemmatizer.Lemma(word)
 		// if !slices.Contains(stopWords, lemma) {
 		l.Output = append(l.Output, Lexeme{
-			Lemma:    lemma,
-			Value:    word,
-			Location: [2]int{l.row, l.col},
+			Lemma:   lemma,
+			Value:   word,
+			Row:     l.row,
+			Col:     l.col,
+			LexType: Word,
 		})
 		// }
 	}
-	fmt.Println(l.Output[len(l.Output)-1])
 	// TODO: finish this
 }
 

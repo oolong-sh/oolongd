@@ -3,6 +3,7 @@ package linking
 import (
 	"slices"
 	"strings"
+	"sync"
 
 	"github.com/oolong-sh/oolong/internal/linking/lexer"
 )
@@ -31,37 +32,60 @@ func (d *Document) GenerateNGrams(nrange []int) {
 
 	slices.Sort(nrange)
 
+	// set up parallelization variables
+	var wg sync.WaitGroup
+	ngmaps := make([]map[string]*NGram, len(nrange))
+	for i := range ngmaps {
+		ngmaps[i] = make(map[string]*NGram)
+	}
+
 	// iterate over all tokens in document
 	for i := 0; i <= len(d.tokens)-nrange[0]; i++ {
 		// iterate over each size of N
-		for _, n := range nrange {
-			if i+n > len(d.tokens) {
-				break
-			}
-
-			// get string representation of ngram string
-			ngString := joinNElements(d.tokens[i : i+n])
-			if ngString == "" {
-				continue
-			}
-
-			// check if ngram is already present in map
-			if ngram, ok := ngrams[ngString]; ok {
-				ngram.count++
-				ngram.locations = append(ngram.locations, d.tokens[i].Location)
-			} else {
-				ngrams[ngString] = &NGram{
-					ngram:     ngString,
-					count:     1,
-					n:         n,
-					document:  d.path,
-					locations: [][2]int{d.tokens[i].Location},
+		wg.Add(len(nrange))
+		for j, n := range nrange {
+			go func(j int, ngmap map[string]*NGram) {
+				defer wg.Done()
+				if i+n > len(d.tokens) {
+					// break
+					return
 				}
-			}
 
-			ngrams[ngString].updateWeight(1)
+				// get string representation of ngram string
+				ngString := joinNElements(d.tokens[i : i+n])
+				if ngString == "" {
+					// continue
+					return
+				}
+
+				// check if ngram is already present in map
+				if ngram, ok := ngmap[ngString]; ok {
+					ngram.count++
+					ngram.locations = append(ngram.locations, [2]int{d.tokens[i].Row, d.tokens[i].Col})
+				} else {
+					ngmap[ngString] = &NGram{
+						ngram:     ngString,
+						count:     1,
+						n:         n,
+						document:  d.path,
+						locations: [][2]int{{d.tokens[i].Row, d.tokens[i].Col}},
+					}
+				}
+
+				// ngrams[ngString].updateWeight(1)
+				ngmap[ngString].updateWeight(1)
+			}(j, ngmaps[j])
+		}
+		wg.Wait()
+	}
+
+	for _, ngmap := range ngmaps {
+		for k, v := range ngmap {
+			ngrams[k] = v
 		}
 	}
+
+	// TODO:
 
 	d.ngrams = ngrams
 }
@@ -82,6 +106,8 @@ func (ng *NGram) updateWeight(stage int) {
 // DOC:
 func joinNElements(nTokens []lexer.Lexeme) string {
 	out := ""
+
+	// TODO: add handling of different lexeme types (i.e. disallow links)
 
 	// check for outer stop words -> skip ngram
 	if slices.Contains(stopWords, nTokens[0].Value) ||

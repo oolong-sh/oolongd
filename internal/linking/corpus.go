@@ -1,11 +1,13 @@
 package linking
 
 import (
+	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"slices"
 	"strings"
+	"sync"
 
 	"github.com/oolong-sh/oolong/internal/linking/lexer"
 )
@@ -50,17 +52,31 @@ func ReadNotesDir(notesDirPaths ...string) ([]*Document, error) {
 			return nil, err
 		}
 
-		// TODO: this could probably be parallelized? --> mutex on documents array
-		for _, notePath := range notePaths {
-			doc, err := ReadDocument(notePath)
-			if err != nil {
-				return nil, err
-			}
-			documents = append(documents, doc)
+		// perform a parallel read of found notes files
+		var wg sync.WaitGroup
+		wg.Add(len(notePaths))
+		docs := make([]*Document, len(notePaths))
+
+		for i, notePath := range notePaths {
+			go func(i int, notePath string) {
+				doc, err := ReadDocument(notePath)
+				if err != nil {
+					fmt.Printf("Failed to read file: '%s' %v", notePath, err)
+					return
+				}
+				docs[i] = doc
+				wg.Done()
+			}(i, notePath)
 		}
+
+		wg.Wait()
+
+		// append results to output array
+		documents = append(documents, docs...)
 	}
 
 	// write out tokens
+	// TEST: for debugging, remove later
 	b := []byte{}
 	for _, d := range documents {
 		for _, t := range d.tokens {
@@ -75,6 +91,7 @@ func ReadNotesDir(notesDirPaths ...string) ([]*Document, error) {
 		panic(err)
 	}
 
+	// TEST: for debugging, remove later
 	b = []byte{}
 	for _, d := range documents {
 		for _, ng := range d.ngrams {
