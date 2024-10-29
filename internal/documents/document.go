@@ -5,17 +5,17 @@ import (
 	"io"
 	"os"
 
+	"github.com/oolong-sh/oolong/internal/config"
 	"github.com/oolong-sh/oolong/internal/linking"
 	"github.com/oolong-sh/oolong/internal/linking/lexer"
 )
 
-// TODO: use config
-var nGramSizes = []int{2, 3, 4, 5}
-
 // DOC:
 type Document struct {
-	path   string
-	ngwgts map[string]float32 // NOTE: this may need to store more information than just weights
+	path string
+	// NOTE: this may need to store more information than just weights
+	// - alternatively, the 'Keywords' function could be generated only when needed
+	ngwgts map[string]float32
 
 	ngrams map[string]*linking.NGram
 	tokens []lexer.Lexeme
@@ -58,15 +58,9 @@ func readDocument(r io.Reader, documentPath string) (*Document, error) {
 	}
 
 	fmt.Printf("Generating NGrams for %s...\n", documentPath)
-	doc.ngrams = linking.GenerateNGrams(doc.tokens, nGramSizes, doc.path)
-
-	// for k, v := range out.ngrams {
-	// 	fmt.Println("Key:", k, " Value: ", v)
-	// }
-
-	// TODO: to avoid re-tokenizing, tokenizer function could take in tokens list
-	// after initial stage
-	// TODO: multi-stage tokenization and ngram calculation
+	doc.ngrams = linking.GenerateNGrams(doc.tokens, config.NGramRange(), doc.path)
+	// TODO: multi-pass ngram calculation?
+	// - allow ngram analyzer to handle uppercase chars and symbols
 
 	doc.setWeightsMap()
 

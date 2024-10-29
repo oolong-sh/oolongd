@@ -15,11 +15,11 @@ func main() {
 	}
 	fmt.Println(cfg.PluginPaths)
 
-	d, err := documents.ReadNotesDir(cfg)
+	d, err := documents.ReadNotesDir()
 	if err != nil {
 		return
 	}
 	_ = d
 
-	// plugin.InitPlugins(&cfg)
+	// plugins.InitPlugins(&cfg)
 }

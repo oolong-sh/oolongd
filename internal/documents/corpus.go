@@ -16,10 +16,10 @@ import (
 // TODO: multi-document ngram merge (maps.copy(dest, src))
 
 // DOC:
-func ReadNotesDir(cfg config.OolongConfig) ([]*Document, error) {
+func ReadNotesDir() ([]*Document, error) {
 	documents := []*Document{}
 
-	for _, notesDirPath := range cfg.NotesDirPaths {
+	for _, notesDirPath := range config.NotesDirPaths() {
 		// expand home dir shorthand
 		if strings.HasPrefix(notesDirPath, "~/") || notesDirPath == "~" {
 			home, err := os.UserHomeDir()
@@ -41,10 +41,9 @@ func ReadNotesDir(cfg config.OolongConfig) ([]*Document, error) {
 
 			// REFACTOR: probably change this to a blacklist
 			// disallow binaries and allow users to blacklist filetypes
-			if slices.Contains(cfg.AllowedExtensions, filepath.Ext(path)) {
+			if slices.Contains(config.AllowedExtensions(), filepath.Ext(path)) {
 				notePaths = append(notePaths, path)
 			}
-
 			return nil
 		}); err != nil {
 			return nil, err

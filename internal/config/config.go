@@ -16,6 +16,11 @@ var config OolongConfig
 
 func Config() OolongConfig { return config }
 
+func NotesDirPaths() []string     { return config.NotesDirPaths }
+func NGramRange() []int           { return config.NGramRange }
+func PluginPaths() []string       { return config.PluginPaths }
+func AllowedExtensions() []string { return config.AllowedExtensions }
+
 // TODO: figure out if this should return a mutable pointer or not
 // (probably not, use hot reloading based on file modifications)
 
