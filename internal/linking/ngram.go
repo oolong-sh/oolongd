@@ -10,7 +10,7 @@ import (
 
 // DOC:
 type NGram struct {
-	ngram string
+	keyword string
 	// FIX: add another weight field for weight across all documents
 	weight float32 // weight of within a single documents NOTE: need one across documents
 	count  int     // count across all documents  NOTE: possibly replace this with a map of ngram->int
@@ -23,11 +23,11 @@ type NGram struct {
 
 // NGram implements Keyword interface
 func (ng *NGram) Weight() float32 { return ng.weight } // FIX: should return weight across documents
-func (ng *NGram) Keyword() string { return ng.ngram }
+func (ng *NGram) Keyword() string { return ng.keyword }
 
 // TODO: update token type to store stage?
 // TODO: take in interface of options to show stage, document, stage scaling factor
-func (d *Document) GenerateNGrams(nrange []int) {
+func GenerateNGrams(tokens []lexer.Lexeme, nrange []int, path string) map[string]*NGram {
 	ngrams := make(map[string]*NGram)
 
 	slices.Sort(nrange)
@@ -40,19 +40,19 @@ func (d *Document) GenerateNGrams(nrange []int) {
 	}
 
 	// iterate over all tokens in document
-	for i := 0; i <= len(d.tokens)-nrange[0]; i++ {
+	for i := 0; i <= len(tokens)-nrange[0]; i++ {
 		// iterate over each size of N
 		wg.Add(len(nrange))
 		for j, n := range nrange {
 			go func(j int, ngmap map[string]*NGram) {
 				defer wg.Done()
-				if i+n > len(d.tokens) {
+				if i+n > len(tokens) {
 					// break
 					return
 				}
 
 				// get string representation of ngram string
-				ngString := joinNElements(d.tokens[i : i+n])
+				ngString := joinNElements(tokens[i : i+n])
 				if ngString == "" {
 					// continue
 					return
@@ -61,14 +61,14 @@ func (d *Document) GenerateNGrams(nrange []int) {
 				// check if ngram is already present in map
 				if ngram, ok := ngmap[ngString]; ok {
 					ngram.count++
-					ngram.locations = append(ngram.locations, [2]int{d.tokens[i].Row, d.tokens[i].Col})
+					ngram.locations = append(ngram.locations, [2]int{tokens[i].Row, tokens[i].Col})
 				} else {
 					ngmap[ngString] = &NGram{
-						ngram:     ngString,
+						keyword:   ngString,
 						count:     1,
 						n:         n,
-						document:  d.path,
-						locations: [][2]int{{d.tokens[i].Row, d.tokens[i].Col}},
+						document:  path,
+						locations: [][2]int{{tokens[i].Row, tokens[i].Col}},
 					}
 				}
 
@@ -86,8 +86,7 @@ func (d *Document) GenerateNGrams(nrange []int) {
 	}
 
 	// TODO:
-
-	d.ngrams = ngrams
+	return ngrams
 }
 
 // DOC:
@@ -131,3 +130,5 @@ func joinNElements(nTokens []lexer.Lexeme) string {
 // TODO: add smart filtering system for tokens
 // - need to be able to filter out noisy tokens
 // - could use some sort of ml validation or a dictionary
+
+// TODO: functions for filtering less frequent ngrams and stop-words

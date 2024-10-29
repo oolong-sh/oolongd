@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/oolong-sh/oolong/internal/config"
-	"github.com/oolong-sh/oolong/internal/linking"
+	"github.com/oolong-sh/oolong/internal/documents"
 )
 
 func main() {
@@ -15,7 +15,7 @@ func main() {
 	}
 	fmt.Println(cfg.PluginPaths)
 
-	d, err := linking.ReadNotesDir(cfg.NotesDirPaths...)
+	d, err := documents.ReadNotesDir(cfg)
 	if err != nil {
 		return
 	}

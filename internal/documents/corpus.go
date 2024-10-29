@@ -1,4 +1,4 @@
-package linking
+package documents
 
 import (
 	"fmt"
@@ -9,19 +9,17 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/oolong-sh/oolong/internal/config"
 	"github.com/oolong-sh/oolong/internal/linking/lexer"
 )
 
-// TODO: multi-document read
 // TODO: multi-document ngram merge (maps.copy(dest, src))
 
-var allowedExts = []string{".md", ".mdx", ".tex", ".typ", ".txt"}
-
 // DOC:
-func ReadNotesDir(notesDirPaths ...string) ([]*Document, error) {
+func ReadNotesDir(cfg config.OolongConfig) ([]*Document, error) {
 	documents := []*Document{}
 
-	for _, notesDirPath := range notesDirPaths {
+	for _, notesDirPath := range cfg.NotesDirPaths {
 		// expand home dir shorthand
 		if strings.HasPrefix(notesDirPath, "~/") || notesDirPath == "~" {
 			home, err := os.UserHomeDir()
@@ -43,7 +41,7 @@ func ReadNotesDir(notesDirPaths ...string) ([]*Document, error) {
 
 			// REFACTOR: probably change this to a blacklist
 			// disallow binaries and allow users to blacklist filetypes
-			if slices.Contains(allowedExts, filepath.Ext(path)) {
+			if slices.Contains(cfg.AllowedExtensions, filepath.Ext(path)) {
 				notePaths = append(notePaths, path)
 			}
 
@@ -95,7 +93,7 @@ func ReadNotesDir(notesDirPaths ...string) ([]*Document, error) {
 	b = []byte{}
 	for _, d := range documents {
 		for _, ng := range d.ngrams {
-			b = append(b, []byte(ng.ngram+"\n")...)
+			b = append(b, []byte(ng.Keyword()+"\n")...)
 		}
 	}
 	err = os.WriteFile("./ngrams.txt", b, 0666)
