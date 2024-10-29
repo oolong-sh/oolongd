@@ -47,14 +47,12 @@ func GenerateNGrams(tokens []lexer.Lexeme, nrange []int, path string) map[string
 			go func(j int, ngmap map[string]*NGram) {
 				defer wg.Done()
 				if i+n > len(tokens) {
-					// break
 					return
 				}
 
 				// get string representation of ngram string
 				ngString := joinNElements(tokens[i : i+n])
 				if ngString == "" {
-					// continue
 					return
 				}
 
@@ -72,13 +70,13 @@ func GenerateNGrams(tokens []lexer.Lexeme, nrange []int, path string) map[string
 					}
 				}
 
-				// ngrams[ngString].updateWeight(1)
 				ngmap[ngString].updateWeight(1)
 			}(j, ngmaps[j])
 		}
 		wg.Wait()
 	}
 
+	// merge result maps
 	for _, ngmap := range ngmaps {
 		for k, v := range ngmap {
 			ngrams[k] = v
@@ -115,8 +113,8 @@ func joinNElements(nTokens []lexer.Lexeme) string {
 	}
 
 	for _, t := range nTokens {
-		// return early if tokens slice contains break sequence
-		if t.Value == lexer.BreakToken {
+		// return early if token type matches the break system
+		if t.LexType == lexer.Break {
 			return ""
 		}
 
