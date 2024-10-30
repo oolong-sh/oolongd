@@ -22,7 +22,7 @@ type Document struct {
 }
 
 // Document implementation of Note interface
-func (d *Document) NotePath() string             { return d.path }
+func (d *Document) Path() string                 { return d.path }
 func (d *Document) Keywords() map[string]float32 { return d.ngwgts }
 
 // DOC:

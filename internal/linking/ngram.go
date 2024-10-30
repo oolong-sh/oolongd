@@ -12,8 +12,8 @@ import (
 type NGram struct {
 	keyword string
 	// FIX: add another weight field for weight across all documents
-	weight float32 // weight of within a single documents NOTE: need one across documents
-	count  int     // count across all documents  NOTE: possibly replace this with a map of ngram->int
+	weight float32 // weight of within a single documents  NOTE: also need weight across documents (map string->f32?)
+	count  int     // count within documents  NOTE: possibly replace this with a map of ngram->int
 	n      int
 
 	// TODO: store all documents ngram is present in and counts within the document
@@ -46,6 +46,7 @@ func GenerateNGrams(tokens []lexer.Lexeme, nrange []int, path string) map[string
 		for j, n := range nrange {
 			go func(j int, ngmap map[string]*NGram) {
 				defer wg.Done()
+
 				if i+n > len(tokens) {
 					return
 				}
@@ -88,19 +89,6 @@ func GenerateNGrams(tokens []lexer.Lexeme, nrange []int, path string) map[string
 }
 
 // DOC:
-func (ng *NGram) updateWeight(stage int) {
-	countWeighting := 0.8 * float32(ng.count)
-	nWeighting := 0.3 * float32(ng.n)
-	stageWeighting := 0.5 * (float32(stage) + 0.01)
-
-	// TODO: advanced weight calculations
-	// Possible naive formula: (count * n) / (scaling_factor * tokenization_stage)
-	// - keep count of total ngrams per document?
-	//   - could be used to scale by in-document importance, but might weight against big documents
-	ng.weight = (countWeighting + nWeighting) / (stageWeighting)
-}
-
-// DOC:
 func joinNElements(nTokens []lexer.Lexeme) string {
 	out := ""
 
@@ -118,15 +106,39 @@ func joinNElements(nTokens []lexer.Lexeme) string {
 			return ""
 		}
 
-		// TODO: handle stop words (but allow in the middle of the word)
-		// - make number of stopwords count toward the weight negatively?
+		// TODO: make number of stopwords count toward the weight negatively?
 		out = strings.Join([]string{out, t.Value}, " ")
 	}
 	return out
 }
 
-// TODO: add smart filtering system for tokens
-// - need to be able to filter out noisy tokens
-// - could use some sort of ml validation or a dictionary
+// DOC:
+func CountNGrams(ngrams map[string]*NGram) map[string]int {
+	// TODO:
+	out := make(map[string]int)
+
+	for k, _ := range ngrams {
+		if _, ok := out[k]; !ok {
+			out[k] = 1
+		} else {
+			out[k]++
+		}
+	}
+
+	return out
+}
 
 // TODO: functions for filtering less frequent ngrams and stop-words
+
+// DOC:
+func (ng *NGram) updateWeight(stage int) {
+	countWeighting := 0.8 * float32(ng.count)
+	nWeighting := 0.3 * float32(ng.n)
+	stageWeighting := 0.5 * (float32(stage) + 0.01)
+
+	// TODO: advanced weight calculations
+	// Possible naive formula: (count * n) / (scaling_factor * tokenization_stage)
+	// - keep count of total ngrams per document?
+	//   - could be used to scale by in-document importance, but might weight against big documents
+	ng.weight = (countWeighting + nWeighting) / (stageWeighting)
+}
