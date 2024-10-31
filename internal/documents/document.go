@@ -6,8 +6,8 @@ import (
 	"os"
 
 	"github.com/oolong-sh/oolong/internal/config"
-	"github.com/oolong-sh/oolong/internal/linking"
 	"github.com/oolong-sh/oolong/internal/linking/lexer"
+	"github.com/oolong-sh/oolong/internal/linking/ngrams"
 )
 
 // DOC:
@@ -17,13 +17,13 @@ type Document struct {
 	// - alternatively, the 'Keywords' function could be generated only when needed
 	ngwgts map[string]float32
 
-	ngrams map[string]*linking.NGram
+	ngrams map[string]*ngrams.NGram
 	tokens []lexer.Lexeme
 }
 
 // Document implementation of Note interface
-func (d *Document) Path() string                 { return d.path }
-func (d *Document) Keywords() map[string]float32 { return d.ngwgts }
+func (d *Document) Path() string                       { return d.path }
+func (d *Document) KeywordWeights() map[string]float32 { return d.ngwgts }
 
 // DOC:
 func ReadDocument(documentPath string) (*Document, error) {
@@ -58,7 +58,7 @@ func readDocument(r io.Reader, documentPath string) (*Document, error) {
 	}
 
 	fmt.Printf("Generating NGrams for %s...\n", documentPath)
-	doc.ngrams = linking.GenerateNGrams(doc.tokens, config.NGramRange(), doc.path)
+	doc.ngrams = ngrams.Generate(doc.tokens, config.NGramRange(), doc.path)
 	// TODO: multi-pass ngram calculation?
 	// - allow ngram analyzer to handle uppercase chars and symbols
 

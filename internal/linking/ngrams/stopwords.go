@@ -1,4 +1,4 @@
-package linking
+package ngrams
 
 // TODO: add more stop words
 var stopWords = []string{
