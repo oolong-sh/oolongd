@@ -4,20 +4,22 @@ import (
 	"fmt"
 
 	"github.com/oolong-sh/oolong/internal/config"
-	"github.com/oolong-sh/oolong/internal/linking"
+	"github.com/oolong-sh/oolong/internal/documents"
 )
 
 func main() {
-	config.Setup("./config.lua")
+	cfg, err := config.Setup("./config.lua")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(cfg.PluginPaths)
 
-	d, err := linking.ReadNotesDir("/home/patrick/notes/")
-	// d, err := linking.ReadDocument("/home/patrick/notes/todo.md")
+	d, err := documents.ReadNotesDir()
 	if err != nil {
 		return
 	}
 	_ = d
 
-	x := config.Config()
-	x.NGramRange = append(x.NGramRange, 1)
-	fmt.Println(config.Config().NGramRange)
+	// plugins.InitPlugins(&cfg)
 }
