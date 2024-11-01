@@ -3,6 +3,7 @@ package lexer
 
 import (
 	"io"
+	"strings"
 )
 
 var eof rune = -1
@@ -19,17 +20,21 @@ func (l *Lexer) push(v LexType) {
 	case Word:
 		word := l.sb.String()
 		lemma := l.lemmatizer.Lemma(word)
-		// if !slices.Contains(stopWords, lemma) {
+
+		// handle lemmatizer bug where first dict entry contains <feff> character
+		lemma = strings.TrimPrefix(lemma, "\ufeff")
+
 		l.Output = append(l.Output, Lexeme{
-			Lemma:   lemma,
-			Value:   word,
-			Row:     l.row,
-			Col:     l.col,
+			Lemma: lemma,
+			Value: word,
+			Row:   l.row,
+			// FIX: handles removed characters incorrectly in calculation (what start is probably supposed to used be for)
+			Col: l.col - 1 - len(word),
+			// Col:     l.col - l.start,
 			LexType: Word,
 		})
-		// }
 	}
-	// TODO: finish this
+	// TODO: handle other types as necessary (mainly urls)
 }
 
 func (l *Lexer) next() rune {
@@ -41,6 +46,8 @@ func (l *Lexer) next() rune {
 	}
 	l.col += l.width
 	l.pos += l.width
+	// l.col++
+	// l.pos++
 
 	return l.r
 }
@@ -49,6 +56,8 @@ func (l *Lexer) backup() {
 	l.br.UnreadRune()
 	l.pos -= l.width
 	l.col -= l.width
+	// l.col--
+	// l.pos--
 }
 
 func (l *Lexer) peek() rune {

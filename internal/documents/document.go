@@ -48,9 +48,7 @@ func readDocument(r io.Reader, documentPath string) (*Document, error) {
 
 	l := lexer.New()
 	fmt.Printf("Running lexer on %s...\n", documentPath)
-	if err := l.Lex(r, initStage); err != nil {
-		return nil, err
-	}
+	l.Lex(r, initStage)
 
 	doc := &Document{
 		path:   documentPath,

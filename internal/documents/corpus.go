@@ -11,6 +11,7 @@ import (
 
 	"github.com/oolong-sh/oolong/internal/config"
 	"github.com/oolong-sh/oolong/internal/linking/lexer"
+	"github.com/oolong-sh/oolong/internal/linking/ngrams"
 )
 
 // TODO: multi-document ngram merge (maps.copy(dest, src))
@@ -90,12 +91,26 @@ func ReadNotesDir() ([]*Document, error) {
 
 	// TEST: for debugging, remove later
 	b = []byte{}
+	ngmap := make(map[string]*ngrams.NGram)
 	for _, d := range documents {
+		ngrams.Merge(ngmap, d.ngrams)
 		for _, ng := range d.ngrams {
 			b = append(b, []byte(ng.Keyword()+"\n")...)
 		}
 	}
 	err = os.WriteFile("./ngrams.txt", b, 0666)
+	if err != nil {
+		panic(err)
+	}
+
+	// TEST: for debugging, remove later
+	ngcounts := ngrams.Count(ngmap)
+	freq := ngrams.OrderByFrequency(ngcounts, 10)
+	b = []byte{}
+	for _, v := range freq {
+		b = append(b, []byte(fmt.Sprintf("%s %v\n", v.Key, v.Value))...)
+	}
+	err = os.WriteFile("./ngram-counts.txt", b, 0666)
 	if err != nil {
 		panic(err)
 	}

@@ -29,10 +29,7 @@ func TestReadDocumentSimple(t *testing.T) {
 	s := "Hello world!"
 	var rd io.Reader = strings.NewReader(s)
 	l := lexer.New()
-	err := l.Lex(rd, stage)
-	if err != nil {
-		t.Fatalf("%v\n", err)
-	}
+	l.Lex(rd, stage)
 
 	fmt.Println("Input:", s, "Output:", l.Output)
 	if len(l.Output) != 2 {
@@ -40,11 +37,13 @@ func TestReadDocumentSimple(t *testing.T) {
 	}
 	expectedTokens := []lexer.Lexeme{
 		{
-			Value:   "hello",
+			Lemma:   "hello",
+			Value:   "Hello",
 			Row:     1,
 			Col:     1,
 			LexType: lexer.Word,
 		}, {
+			Lemma:   "world",
 			Value:   "world",
 			Row:     1,
 			Col:     7,
@@ -52,23 +51,22 @@ func TestReadDocumentSimple(t *testing.T) {
 		},
 	}
 	if !slices.Equal(l.Output, expectedTokens) {
-		t.Fatalf("Unexepcted lexer output. Expected %+v, got %+v\n", expectedTokens, l.Output)
+		t.Fatalf("Unexpected lexer output. Expected %+v, got %+v\n", expectedTokens, l.Output)
 	}
 
 	// basic test with newlines (should contain `breakToken`)
 	s = "Hello, \nworld!"
 	rd = strings.NewReader(s)
+	l = lexer.New()
 	l.Lex(rd, stage)
-	if err != nil {
-		t.Fatalf("%v\n", err)
-	}
 	fmt.Println("Input:", s, " Output:", l.Output)
 	if len(l.Output) != 3 {
-		t.Fatalf("Incorrect Document.tokens length. Expected %d, got %d", 2, len(l.Output))
+		t.Fatalf("Incorrect output length. Expected %d, got %d", 3, len(l.Output))
 	}
 	expectedTokens = []lexer.Lexeme{
 		{
-			Value:   "hello",
+			Lemma:   "hello",
+			Value:   "Hello",
 			Row:     1,
 			Col:     1,
 			LexType: lexer.Word,
@@ -80,23 +78,22 @@ func TestReadDocumentSimple(t *testing.T) {
 			LexType: lexer.Break,
 		},
 		{
-			Value:   "world",
+			Lemma:   "world",
+			Value:   "World",
 			Row:     2,
 			Col:     1,
 			LexType: lexer.Word,
 		},
 	}
 	if !slices.Equal(l.Output, expectedTokens) {
-		t.Fatalf("Unexepcted lexer output. Expected %+v, got %+v\n", expectedTokens, l.Output)
+		t.Fatalf("Unexpected lexer output. Expected %+v, got %+v\n", expectedTokens, l.Output)
 	}
 
 	// test with many newlines and multiple single-line lexemes
 	s = "\nHello, \nworld! Foo-bar baz   \n\n foo"
 	rd = strings.NewReader(s)
 	l.Lex(rd, stage)
-	if err != nil {
-		t.Fatalf("%v\n", err)
-	}
+	l = lexer.New()
 	fmt.Println("Input:", s, " Output:", l.Output)
 	if len(l.Output) != 9 {
 		t.Fatalf("Incorrect Document.Content length. Expected %d, got %d", 5, len(l.Output))

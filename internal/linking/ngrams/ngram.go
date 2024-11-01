@@ -1,7 +1,9 @@
 package ngrams
 
 import (
+	"fmt"
 	"slices"
+	"sort"
 	"sync"
 
 	"github.com/oolong-sh/oolong/internal/linking/lexer"
@@ -48,7 +50,7 @@ type location struct {
 // NGram implements Keyword interface
 func (ng *NGram) Weight() float32                  { return ng.globalWeight }
 func (ng *NGram) Keyword() string                  { return ng.keyword }
-func (ng *NGram) Documents() map[string]*NGramInfo { return ng.documents }
+func (ng *NGram) Documents() map[string]*NGramInfo { return ng.documents } // CHANGE: this to return a map of paths to weights?
 
 // TODO: update token type to store stage?
 // TODO: take in interface of options to show stage, document, stage scaling factor
@@ -99,19 +101,63 @@ func Generate(tokens []lexer.Lexeme, nrange []int, path string) map[string]*NGra
 }
 
 // DOC:
-func CountNGrams(ngrams map[string]*NGram) map[string]int {
-	// TODO:
+// TEST:
+func Merge(m1, m2 map[string]*NGram) {
+	for k, v2 := range m2 {
+		if v1, ok := m1[k]; !ok {
+			m1[k] = v2
+		} else {
+			v1.globalCount += v2.globalCount
+			v1.globalWeight = (v1.globalWeight + v2.globalWeight) / 2 // TODO: more advanced weight logic
+			for dk, dv := range v2.documents {
+				v1.documents[dk] = dv
+			}
+		}
+	}
+}
+
+// DOC:
+func Count(ngrams map[string]*NGram) map[string]int {
 	out := make(map[string]int)
 
-	for k := range ngrams {
-		if _, ok := out[k]; !ok {
-			out[k] = 1
-		} else {
-			out[k]++
-		}
+	for k, v := range ngrams {
+		out[k] = v.globalCount
 	}
 
 	return out
+}
+
+// TEST:
+func OrderByFrequency(counts map[string]int, limit int) []struct {
+	Key   string
+	Value int
+} {
+	kvList := make([]struct {
+		Key   string
+		Value int
+	}, 0, len(counts))
+
+	// Populate the slice with key-value pairs from the map
+	for k, v := range counts {
+		kvList = append(kvList, struct {
+			Key   string
+			Value int
+		}{k, v})
+	}
+
+	// Sort kvList by the values in descending order
+	sort.Slice(kvList, func(i, j int) bool {
+		return kvList[i].Value > kvList[j].Value
+	})
+
+	// Print sorted key-value pairs with values meeting the limit condition
+	for _, kv := range kvList {
+		if kv.Value >= limit {
+			fmt.Printf("%s: %d\n", kv.Key, kv.Value)
+		}
+	}
+
+	return kvList
 }
 
 // TODO: functions for filtering less frequent ngrams and stop-words

@@ -32,7 +32,7 @@ func addNGram(k string, n int, ngmap map[string]*NGram, i int, tokens []lexer.Le
 
 // DOC:
 func joinNElements(nTokens []lexer.Lexeme) string {
-	out := ""
+	var out string
 
 	// TODO: add handling of different lexeme types (i.e. disallow links)
 
@@ -49,8 +49,11 @@ func joinNElements(nTokens []lexer.Lexeme) string {
 		}
 
 		// TODO: make number of stopwords count toward the weight negatively?
-		out = strings.Join([]string{out, t.Value}, " ")
+		out = strings.Join([]string{out, strings.ToLower(t.Value)}, " ")
+		// out = strings.Join([]string{out, t.Value}, " ")
 	}
+	// FIX: out has a leading whitespace
+
 	return out
 }
 
