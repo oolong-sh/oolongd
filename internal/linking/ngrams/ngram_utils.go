@@ -18,13 +18,15 @@ func addNGram(k string, n int, ngmap map[string]*NGram, i int, tokens []lexer.Le
 		documents := make(map[string]*NGramInfo)
 		documents[path] = &NGramInfo{
 			DocumentCount:     1,
+			DocumentWeight:    0, // TODO:
 			DocumentLocations: []location{{row: tokens[i].Row, col: tokens[i].Col}},
+			DocumentTermFreq:  0, // TODO:
 		}
 		ngmap[k] = &NGram{
 			keyword:      k,
 			n:            n,
 			globalCount:  1,
-			globalWeight: 0,
+			globalWeight: 0, // TODO:
 			documents:    documents,
 		}
 	}
@@ -32,7 +34,7 @@ func addNGram(k string, n int, ngmap map[string]*NGram, i int, tokens []lexer.Le
 
 // DOC:
 func joinNElements(nTokens []lexer.Lexeme) string {
-	var out string
+	var parts []string
 
 	// TODO: add handling of different lexeme types (i.e. disallow links)
 
@@ -47,21 +49,17 @@ func joinNElements(nTokens []lexer.Lexeme) string {
 		if t.LexType == lexer.Break {
 			return ""
 		}
-
-		// TODO: make number of stopwords count toward the weight negatively?
-		out = strings.Join([]string{out, strings.ToLower(t.Value)}, " ")
-		// out = strings.Join([]string{out, t.Value}, " ")
+		parts = append(parts, strings.ToLower(t.Value))
 	}
-	// FIX: out has a leading whitespace
 
-	return out
+	return strings.Join(parts, " ")
 }
 
 // DOC:
 func (ng *NGram) updateWeight(stage int) {
-	countWeighting := 0.8 * float32(ng.globalCount)
-	nWeighting := 0.3 * float32(ng.n)
-	stageWeighting := 0.5 * (float32(stage) + 0.01)
+	countWeighting := 0.8 * float64(ng.globalCount)
+	nWeighting := 0.3 * float64(ng.n)
+	stageWeighting := 0.5 * (float64(stage) + 0.01)
 
 	// TODO: advanced weight calculations
 	// Possible naive formula: (count * n) / (scaling_factor * tokenization_stage)

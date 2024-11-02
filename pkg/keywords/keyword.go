@@ -2,5 +2,5 @@ package keywords
 
 type Keyword interface {
 	Keyword() string
-	Weight() float32
+	Weight() float64
 }

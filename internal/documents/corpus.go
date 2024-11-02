@@ -94,8 +94,12 @@ func ReadNotesDir() ([]*Document, error) {
 	ngmap := make(map[string]*ngrams.NGram)
 	for _, d := range documents {
 		ngrams.Merge(ngmap, d.ngrams)
+	}
+	// ngrams.Idf(ngmap, len(documents))
+	ngrams.CalcWeights(ngmap, len(documents))
+	for _, d := range documents {
 		for _, ng := range d.ngrams {
-			b = append(b, []byte(ng.Keyword()+"\n")...)
+			b = append(b, []byte(fmt.Sprintf("%s\n", ng.Keyword()))...)
 		}
 	}
 	err = os.WriteFile("./ngrams.txt", b, 0666)
@@ -104,8 +108,9 @@ func ReadNotesDir() ([]*Document, error) {
 	}
 
 	// TEST: for debugging, remove later
-	ngcounts := ngrams.Count(ngmap)
-	freq := ngrams.OrderByFrequency(ngcounts, 10)
+	// ngcounts := ngrams.Count(ngmap)
+	// freq := ngrams.OrderByFrequency(ngcounts, 10)
+	freq := ngrams.OrderByFrequency(ngmap, 10)
 	b = []byte{}
 	for _, v := range freq {
 		b = append(b, []byte(fmt.Sprintf("%s %v\n", v.Key, v.Value))...)
