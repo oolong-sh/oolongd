@@ -49,21 +49,31 @@ func joinNElements(nTokens []lexer.Lexeme) string {
 		if t.LexType == lexer.Break {
 			return ""
 		}
-		parts = append(parts, strings.ToLower(t.Value))
+		// NOTE: choose between Value and Lemma here
+		// parts = append(parts, strings.ToLower(t.Value))
+		parts = append(parts, strings.ToLower(t.Lemma))
 	}
 
 	return strings.Join(parts, " ")
 }
 
 // DOC:
-func (ng *NGram) updateWeight(stage int) {
-	countWeighting := 0.8 * float64(ng.globalCount)
-	nWeighting := 0.3 * float64(ng.n)
-	stageWeighting := 0.5 * (float64(stage) + 0.01)
+func (ng *NGram) updateWeight() {
+	// countWeighting := 0.8 * float64(ng.globalCount)
+	// nWeighting := 0.3 * float64(ng.n)
+	// stageWeighting := 0.5 * (float64(stage) + 0.01)
+
+	w := 0.0
+	df := 0.0
+	for _, nginfo := range ng.documents {
+		w += nginfo.DocumentTfIdf
+		df++
+	}
 
 	// TODO: advanced weight calculations
 	// Possible naive formula: (count * n) / (scaling_factor * tokenization_stage)
 	// - keep count of total ngrams per document?
 	//   - could be used to scale by in-document importance, but might weight against big documents
-	ng.globalWeight = (countWeighting + nWeighting) / (stageWeighting)
+	// ng.globalWeight = (countWeighting + nWeighting) / (stageWeighting)
+	ng.globalWeight = w / df
 }

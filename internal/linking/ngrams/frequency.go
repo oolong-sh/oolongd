@@ -1,6 +1,8 @@
 package ngrams
 
-import "math"
+import (
+	"math"
+)
 
 // Calculate term frequency (f_td / (sum f_t'd))
 func tf(ngmap map[string]*NGram, path string) {

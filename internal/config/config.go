@@ -30,7 +30,7 @@ func AllowedExtensions() []string { return config.AllowedExtensions }
 func Setup(configDir string) (OolongConfig, error) {
 	// TODO: Read plugins
 	config = OolongConfig{
-		NGramRange:        []int{2, 3, 4},
+		NGramRange:        []int{1, 2, 3},
 		PluginPaths:       []string{"./scripts/daily_note.lua", "./scripts/event_plugin.lua"},
 		NotesDirPaths:     []string{"/home/patrick/notes"},
 		AllowedExtensions: []string{".md", ".mdx", ".tex", ".typ", ".txt"},

@@ -1,7 +1,6 @@
 package ngrams
 
 import (
-	"fmt"
 	"slices"
 	"sort"
 	"sync"
@@ -45,8 +44,7 @@ func (ng *NGram) Documents() map[string]*NGramInfo { return ng.documents } // CH
 func (ng *NGram) Count() int   { return ng.globalCount }
 func (ng *NGram) IDF() float64 { return ng.inverseDocFreq }
 
-// TODO: update token type to store stage?
-// TODO: take in interface of options to show stage, document, stage scaling factor
+// DOC:
 func Generate(tokens []lexer.Lexeme, nrange []int, path string) map[string]*NGram {
 	ngrams := make(map[string]*NGram)
 	slices.Sort(nrange)
@@ -77,7 +75,7 @@ func Generate(tokens []lexer.Lexeme, nrange []int, path string) map[string]*NGra
 
 				// check if ngram is already present in map
 				addNGram(ng, n, ngmap, i, tokens, path)
-				ngmap[ng].updateWeight(1) // CHANGE: only calculate weights after maps are merged?
+				// ngmap[ng].updateWeight() // CHANGE: only calculate weights after maps are merged?
 			}(j, ngmaps[j])
 		}
 		wg.Wait()
@@ -97,9 +95,25 @@ func Generate(tokens []lexer.Lexeme, nrange []int, path string) map[string]*NGra
 }
 
 // TODO: finish this function
-func CalcWeights(m map[string]*NGram, N int) {
-	idf(m, N)
-	tfidf(m)
+func CalcWeights(ngmap map[string]*NGram, N int) {
+	idf(ngmap, N)
+	tfidf(ngmap)
+	// CHANGE: probably take n and word length into account
+	for _, ng := range ngmap {
+		ng.updateWeight()
+	}
+}
+
+// TODO: maybe get rid of this function?
+func FilterMeaningfulNGrams(ngmap map[string]*NGram, minDF int, maxDF int, minAvgTFIDF float64) []string {
+	var out []string
+	for k, ng := range ngmap {
+		N := len(ng.documents)
+		if N >= minDF && N <= maxDF && ng.globalWeight >= minAvgTFIDF {
+			out = append(out, k)
+		}
+	}
+	return out
 }
 
 // Merge 2 or more string->*NGram maps
@@ -145,21 +159,13 @@ func OrderByFrequency(m map[string]*NGram, limit int) []struct {
 		kvList = append(kvList, struct {
 			Key   string
 			Value float64
-		}{k, v.inverseDocFreq})
+		}{k, v.globalWeight})
 	}
 
 	// Sort kvList by the values in descending order
 	sort.Slice(kvList, func(i, j int) bool {
 		return kvList[i].Value < kvList[j].Value
 	})
-
-	// Print sorted key-value pairs with values meeting the limit condition
-	for _, kv := range kvList {
-		// if kv.Value >= limit {
-		// fmt.Printf("%s: %d\n", kv.Key, kv.Value)
-		// }
-		fmt.Printf("%s: %f\n", kv.Key, kv.Value)
-	}
 
 	return kvList
 }

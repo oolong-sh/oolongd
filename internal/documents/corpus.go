@@ -91,21 +91,26 @@ func ReadNotesDir() ([]*Document, error) {
 
 	// TEST: for debugging, remove later
 	b = []byte{}
+	b = append(b, []byte("ngram, weight, count\n")...)
 	ngmap := make(map[string]*ngrams.NGram)
 	for _, d := range documents {
 		ngrams.Merge(ngmap, d.ngrams)
 	}
-	// ngrams.Idf(ngmap, len(documents))
 	ngrams.CalcWeights(ngmap, len(documents))
+	fmt.Println(ngrams.FilterMeaningfulNGrams(ngmap, 2, 35, 0.1)) // NOTE: this doesn't really work that well
 	for _, d := range documents {
 		for _, ng := range d.ngrams {
-			b = append(b, []byte(fmt.Sprintf("%s\n", ng.Keyword()))...)
+			b = append(b, []byte(fmt.Sprintf("%s, %f, %d\n", ng.Keyword(), ng.Weight(), ng.Count()))...)
+			// for p, d := range ng.Documents() {
+			// 	fmt.Println(ng.Keyword(), p, d.DocumentTfIdf)
+			// }
 		}
 	}
 	err = os.WriteFile("./ngrams.txt", b, 0666)
 	if err != nil {
 		panic(err)
 	}
+	// ngrams.CosineSimilarity(ngmap)
 
 	// TEST: for debugging, remove later
 	// ngcounts := ngrams.Count(ngmap)
