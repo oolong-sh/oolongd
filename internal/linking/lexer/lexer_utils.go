@@ -3,10 +3,26 @@ package lexer
 
 import (
 	"io"
+	"regexp"
 	"strings"
 )
 
 var eof rune = -1
+
+var (
+	// Heading (e.g., # Heading, ## Heading) - only matches standalone heading lines
+	headingPattern = regexp.MustCompile(`^(#{1,6})\s+(.+?)\s*$`)
+	// Bold text (e.g., **bold** or __bold__) - matches inline without lookaheads/behinds
+	boldPattern = regexp.MustCompile(`\*\*(.+?)\*\*|__(.+?)__`)
+	// Italic text (e.g., *italic* or _italic_) - matches inline without lookaheads/behinds
+	italicPattern = regexp.MustCompile(`(?:^|[^\w])(\*(\w+?)\*|_(\w+?)_)(?:[^\w]|$)`)
+	// Lists (e.g., - item or * item) - matches only at the beginning of a line
+	listPattern = regexp.MustCompile(`(?m)^\s*([*+-])\s+(.+)$`)
+	// Link (e.g., [text](url))
+	linkPattern = regexp.MustCompile(`\[(.*?)\]\((.*?)\)`)
+	// Image (e.g., ![alt text](url))
+	imagePattern = regexp.MustCompile(`!\[(.*?)\]\((.*?)\)`)
+)
 
 func (l *Lexer) push(v LexType) {
 	switch v {
@@ -16,6 +32,7 @@ func (l *Lexer) push(v LexType) {
 			Row:     l.row,
 			Col:     l.col,
 			LexType: Break,
+			Zone:    l.zone,
 		})
 	case Word:
 		word := l.sb.String()
@@ -32,6 +49,7 @@ func (l *Lexer) push(v LexType) {
 			Col: l.col - 1 - len(word),
 			// Col:     l.col - l.start,
 			LexType: Word,
+			Zone:    l.zone,
 		})
 	}
 	// TODO: handle other types as necessary (mainly urls)
@@ -81,4 +99,27 @@ func (l *Lexer) accept() {
 func (l *Lexer) ignore() {
 	l.start = l.pos
 	l.sb.Reset()
+}
+
+func (l *Lexer) detectZone() {
+	peekBuffer, _ := l.br.Peek(128) // Adjust size as needed
+
+	switch {
+	// FIX: handle remaining cases
+	// TODO: add capture group for code blocks (might just need a boolean flag for them)
+	case headingPattern.Match(peekBuffer):
+		l.zone = H1
+	// case sectionPattern.Match(peekBuffer):
+	// 	l.zone = Default
+	// case boldPattern.Match(peekBuffer):
+	// 	l.zone = Bold
+	// case italicPattern.Match(peekBuffer):
+	// 	l.zone = Italic
+	// case inlineMathPattern.Match(peekBuffer):
+	// 	l.zone = Math
+	// case displayMathPattern.Match(peekBuffer):
+	// 	l.zone = "math-display"
+	default:
+		l.zone = Default
+	}
 }

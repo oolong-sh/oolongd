@@ -81,7 +81,7 @@ func ReadNotesDir() ([]*Document, error) {
 			if t.Value == lexer.BreakToken {
 				continue
 			}
-			b = append(b, []byte(t.Lemma+", "+t.Value+"\n")...)
+			b = append(b, []byte(fmt.Sprintf("%s, %s, %d\n", t.Lemma, t.Value, t.Zone))...)
 		}
 	}
 	err := os.WriteFile("./tokens.txt", b, 0666)
@@ -91,22 +91,28 @@ func ReadNotesDir() ([]*Document, error) {
 
 	// TEST: for debugging, remove later
 	b = []byte{}
-	b = append(b, []byte("ngram, weight, count\n")...)
+	b = append(b, []byte("ngram,weight,count\n")...)
 	ngmap := make(map[string]*ngrams.NGram)
 	for _, d := range documents {
 		ngrams.Merge(ngmap, d.ngrams)
 	}
 	ngrams.CalcWeights(ngmap, len(documents))
-	fmt.Println(ngrams.FilterMeaningfulNGrams(ngmap, 2, 35, 0.1)) // NOTE: this doesn't really work that well
 	for _, d := range documents {
 		for _, ng := range d.ngrams {
 			b = append(b, []byte(fmt.Sprintf("%s, %f, %d\n", ng.Keyword(), ng.Weight(), ng.Count()))...)
-			// for p, d := range ng.Documents() {
-			// 	fmt.Println(ng.Keyword(), p, d.DocumentTfIdf)
-			// }
 		}
 	}
 	err = os.WriteFile("./ngrams.txt", b, 0666)
+	if err != nil {
+		panic(err)
+	}
+	b = []byte{}
+	b = append(b, []byte("ngram,weight,count,ndocs\n")...)
+	mng := ngrams.FilterMeaningfulNGrams(ngmap, 2, int(float64(len(documents))/1.5), 4.0)
+	for _, s := range mng {
+		b = append(b, []byte(fmt.Sprintf("%s,%f,%d,%d\n", s, ngmap[s].Weight(), ngmap[s].Count(), len(ngmap[s].Documents())))...)
+	}
+	err = os.WriteFile("./meaningful-ngrams.csv", b, 0666)
 	if err != nil {
 		panic(err)
 	}
@@ -115,10 +121,10 @@ func ReadNotesDir() ([]*Document, error) {
 	// TEST: for debugging, remove later
 	// ngcounts := ngrams.Count(ngmap)
 	// freq := ngrams.OrderByFrequency(ngcounts, 10)
-	freq := ngrams.OrderByFrequency(ngmap, 10)
+	freq := ngrams.OrderByFrequency(ngmap)
 	b = []byte{}
 	for _, v := range freq {
-		b = append(b, []byte(fmt.Sprintf("%s %v\n", v.Key, v.Value))...)
+		b = append(b, []byte(fmt.Sprintf("%s %f\n", v.Key, v.Value))...)
 	}
 	err = os.WriteFile("./ngram-counts.txt", b, 0666)
 	if err != nil {

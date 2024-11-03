@@ -32,8 +32,8 @@ func Setup(configDir string) (OolongConfig, error) {
 	config = OolongConfig{
 		NGramRange:        []int{1, 2, 3},
 		PluginPaths:       []string{"./scripts/daily_note.lua", "./scripts/event_plugin.lua"},
-		NotesDirPaths:     []string{"/home/patrick/notes"},
-		AllowedExtensions: []string{".md", ".mdx", ".tex", ".typ", ".txt"},
+		NotesDirPaths:     []string{"/home/patrick/notes", "/home/patrick/school/cs5704"},
+		AllowedExtensions: []string{".md", ".mdx", ".tex", ".typ"},
 	}
 	// TODO: read config information from lua
 	return config, nil

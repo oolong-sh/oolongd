@@ -4,16 +4,18 @@ import (
 	"math"
 )
 
-// Calculate term frequency (f_td / (sum f_t'd))
+// Calculate term frequency
 func tf(ngmap map[string]*NGram, path string) {
-	totalCount := 0
-	for _, ng := range ngmap {
-		totalCount += ng.documents[path].DocumentCount
-	}
+	// totalCount := 0
+	// for _, ng := range ngmap {
+	// 	totalCount += ng.documents[path].DocumentCount
+	// }
 
 	for _, ng := range ngmap {
 		nginfo := ng.documents[path]
-		nginfo.DocumentTF = float64(nginfo.DocumentCount) / float64(totalCount)
+		// normalize by document token count
+		// nginfo.DocumentTF = float64(nginfo.DocumentCount) / float64(totalCount)
+		nginfo.DocumentTF = float64(nginfo.DocumentCount)
 	}
 }
 
@@ -49,7 +51,7 @@ func tfidf(ngmap map[string]*NGram) {
 // k1: controls saturation of TF (normally between 1.2 and 2)
 // b: controls document length normalization (0 is no normaliztion)
 // TODO: add bm25f modifications to account for zones -- add zone tracking to lexer (zones affect b, k1, idf)
-func bm25(ngmap map[string]*NGram, k1 float64, b float64) {
+func bm25(ngmap map[string]*NGram) {
 	d := make(map[string]float64)
 	totalLength := 0.0
 
@@ -66,12 +68,12 @@ func bm25(ngmap map[string]*NGram, k1 float64, b float64) {
 	davg := totalLength / float64(len(d))
 
 	// calculate bm25 per ngram per document
+	var b, k1 float64
 	for _, ng := range ngmap {
+		b = zoneB[ng.zone]
+		k1 = zoneK1[ng.zone]
 		for path, nginfo := range ng.documents {
 			nginfo.DocumentBM25 = ng.idf * ((nginfo.DocumentTF * (k1 + 1)) / (nginfo.DocumentTF + k1*(1-b+b*(d[path]/davg))))
-
-			// TEST: remove this later
-			// fmt.Printf("NGram: %s, Document: %s, BM25 Score: %.4f\n", n, path, nginfo.DocumentBM25)
 		}
 	}
 }

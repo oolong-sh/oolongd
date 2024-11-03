@@ -17,6 +17,7 @@ type NGram struct {
 	globalWeight float64
 	globalCount  int
 	idf          float64
+	zone         lexer.Zone
 
 	// store all documents ngram is present in and info within the document
 	documents map[string]*NGramInfo
@@ -62,7 +63,7 @@ func Generate(tokens []lexer.Lexeme, nrange []int, path string) map[string]*NGra
 		// iterate over each size of N
 		wg.Add(len(nrange))
 		for j, n := range nrange {
-			go func(j int, ngmap map[string]*NGram) {
+			go func(j int, n int, ngmap map[string]*NGram) {
 				defer wg.Done()
 				if i+n > len(tokens) {
 					return
@@ -76,8 +77,7 @@ func Generate(tokens []lexer.Lexeme, nrange []int, path string) map[string]*NGra
 
 				// check if ngram is already present in map
 				addNGram(ng, n, ngmap, i, tokens, path)
-				// ngmap[ng].updateWeight() // CHANGE: only calculate weights after maps are merged?
-			}(j, ngmaps[j])
+			}(j, n, ngmaps[j])
 		}
 		wg.Wait()
 	}
@@ -124,7 +124,7 @@ func Count(ngrams map[string]*NGram) map[string]int {
 }
 
 // TODO: decide what metric to use here (count vs weight vs idf)
-func OrderByFrequency(m map[string]*NGram, limit int) []struct {
+func OrderByFrequency(m map[string]*NGram) []struct {
 	Key   string
 	Value float64
 } {

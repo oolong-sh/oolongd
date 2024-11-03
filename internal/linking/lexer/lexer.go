@@ -24,6 +24,7 @@ type Lexer struct {
 	row   int
 	col   int
 
+	zone       Zone
 	lemmatizer *golem.Lemmatizer
 	sb         strings.Builder
 
@@ -42,6 +43,7 @@ func New() *Lexer {
 		start:      1,
 		row:        1,
 		col:        1,
+		zone:       Default,
 		lemmatizer: lemmatizer,
 		Output:     []Lexeme{},
 	}
@@ -51,16 +53,16 @@ func New() *Lexer {
 // NOTE: could rewrite with regex instead of hardcoded special cases
 func (l *Lexer) Lex(r io.Reader, stage int) {
 	l.br = bufio.NewReader(r)
-
-	// FIX: there is some issue here when the end of the reader is reached
-	// - in tests it is replicating contents (possibly needed to be reset?)
-	// may or may not be related to '<feff>1, first' lines showing up in token output
-	// FIX: feff line is definitely coming from the lemmatizer
-
+	isNewline := true
 	for {
 		r := l.next()
 		if r == eof {
 			break
+		}
+
+		if isNewline {
+			l.detectZone()
+			isNewline = false
 		}
 
 		switch {
@@ -71,6 +73,7 @@ func (l *Lexer) Lex(r io.Reader, stage int) {
 				l.ignore()
 			}
 			if r == '\n' {
+				isNewline = true
 				l.push(Break)
 				l.row++
 				l.col = 1
