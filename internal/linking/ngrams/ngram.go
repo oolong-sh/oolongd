@@ -14,9 +14,9 @@ type NGram struct {
 	n       int
 
 	// weight and count across all documents
-	globalWeight   float64
-	globalCount    int
-	inverseDocFreq float64
+	globalWeight float64
+	globalCount  int
+	idf          float64
 
 	// store all documents ngram is present in and info within the document
 	documents map[string]*NGramInfo
@@ -27,8 +27,9 @@ type NGramInfo struct {
 	DocumentCount     int
 	DocumentWeight    float64
 	DocumentLocations []location
-	DocumentTermFreq  float64
+	DocumentTF        float64
 	DocumentTfIdf     float64
+	DocumentBM25      float64
 }
 
 type location struct {
@@ -42,7 +43,7 @@ func (ng *NGram) Keyword() string                  { return ng.keyword }
 func (ng *NGram) Documents() map[string]*NGramInfo { return ng.documents } // CHANGE: this to return a map of paths to weights?
 
 func (ng *NGram) Count() int   { return ng.globalCount }
-func (ng *NGram) IDF() float64 { return ng.inverseDocFreq }
+func (ng *NGram) IDF() float64 { return ng.idf }
 
 // DOC:
 func Generate(tokens []lexer.Lexeme, nrange []int, path string) map[string]*NGram {
@@ -94,28 +95,6 @@ func Generate(tokens []lexer.Lexeme, nrange []int, path string) map[string]*NGra
 	return ngrams
 }
 
-// TODO: finish this function
-func CalcWeights(ngmap map[string]*NGram, N int) {
-	idf(ngmap, N)
-	tfidf(ngmap)
-	// CHANGE: probably take n and word length into account
-	for _, ng := range ngmap {
-		ng.updateWeight()
-	}
-}
-
-// TODO: maybe get rid of this function?
-func FilterMeaningfulNGrams(ngmap map[string]*NGram, minDF int, maxDF int, minAvgTFIDF float64) []string {
-	var out []string
-	for k, ng := range ngmap {
-		N := len(ng.documents)
-		if N >= minDF && N <= maxDF && ng.globalWeight >= minAvgTFIDF {
-			out = append(out, k)
-		}
-	}
-	return out
-}
-
 // Merge 2 or more string->*NGram maps
 func Merge(maps ...map[string]*NGram) {
 	for i := 1; i < len(maps); i++ {
@@ -124,7 +103,7 @@ func Merge(maps ...map[string]*NGram) {
 				maps[0][k] = vi
 			} else {
 				v0.globalCount += vi.globalCount
-				v0.globalWeight = (v0.globalWeight + vi.globalWeight) / 2 // TODO: more advanced weight logic
+				// v0.globalWeight = (v0.globalWeight + vi.globalWeight) / 2 // TODO: more advanced weight logic
 				for dk, dv := range vi.documents {
 					v0.documents[dk] = dv
 				}

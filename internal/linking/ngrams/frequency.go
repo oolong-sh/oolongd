@@ -13,7 +13,7 @@ func tf(ngmap map[string]*NGram, path string) {
 
 	for _, ng := range ngmap {
 		nginfo := ng.documents[path]
-		nginfo.DocumentTermFreq = float64(nginfo.DocumentCount) / float64(totalCount)
+		nginfo.DocumentTF = float64(nginfo.DocumentCount) / float64(totalCount)
 	}
 }
 
@@ -23,7 +23,15 @@ func tf(ngmap map[string]*NGram, path string) {
 // This calculation must happen after all document NGram maps are merged
 func idf(ngmap map[string]*NGram, N int) {
 	for _, ng := range ngmap {
-		ng.inverseDocFreq = math.Log(float64(N) / float64(1+len(ng.documents)))
+		// normal idf
+		// ng.inverseDocFreq = math.Log(float64(N) / float64(1+len(ng.documents)))
+
+		// smoothed idf
+		// ng.idf = math.Log(1 + float64(N)/float64(1+len(ng.documents)))
+
+		// okapi idf
+		n := float64(len(ng.documents))
+		ng.idf = math.Log((0.5+float64(N)-n)/(0.5+n) + 1)
 	}
 }
 
@@ -32,7 +40,38 @@ func idf(ngmap map[string]*NGram, N int) {
 func tfidf(ngmap map[string]*NGram) {
 	for _, ng := range ngmap {
 		for _, nginfo := range ng.documents {
-			nginfo.DocumentTfIdf = nginfo.DocumentTermFreq * ng.inverseDocFreq
+			nginfo.DocumentTfIdf = nginfo.DocumentTF * ng.idf
+		}
+	}
+}
+
+// Best Matching 25 -- Alternative matching function that doesn't downweight common terms as much
+// k1: controls saturation of TF (normally between 1.2 and 2)
+// b: controls document length normalization (0 is no normaliztion)
+// TODO: add bm25f modifications to account for zones -- add zone tracking to lexer (zones affect b, k1, idf)
+func bm25(ngmap map[string]*NGram, k1 float64, b float64) {
+	d := make(map[string]float64)
+	totalLength := 0.0
+
+	// calculate document lengths and avg
+	for _, ng := range ngmap {
+		for path, nginfo := range ng.documents {
+			if _, ok := d[path]; !ok {
+				d[path] = 0
+			}
+			d[path] += float64(nginfo.DocumentCount)
+			totalLength += float64(nginfo.DocumentCount)
+		}
+	}
+	davg := totalLength / float64(len(d))
+
+	// calculate bm25 per ngram per document
+	for _, ng := range ngmap {
+		for path, nginfo := range ng.documents {
+			nginfo.DocumentBM25 = ng.idf * ((nginfo.DocumentTF * (k1 + 1)) / (nginfo.DocumentTF + k1*(1-b+b*(d[path]/davg))))
+
+			// TEST: remove this later
+			// fmt.Printf("NGram: %s, Document: %s, BM25 Score: %.4f\n", n, path, nginfo.DocumentBM25)
 		}
 	}
 }
