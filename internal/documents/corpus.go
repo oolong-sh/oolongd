@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
-	"strings"
 	"sync"
 
 	"github.com/oolong-sh/oolong/internal/config"
@@ -21,18 +20,6 @@ func ReadNotesDir() ([]*Document, error) {
 	documents := []*Document{}
 
 	for _, notesDirPath := range config.NotesDirPaths() {
-		// expand home dir shorthand
-		if strings.HasPrefix(notesDirPath, "~/") || notesDirPath == "~" {
-			home, err := os.UserHomeDir()
-			if err != nil {
-				return nil, err
-			}
-			if notesDirPath == "~" {
-				notesDirPath = home
-			}
-			notesDirPath = filepath.Join(home, notesDirPath[2:])
-		}
-
 		// extract all note file paths from notes directory
 		notePaths := []string{}
 		if err := filepath.WalkDir(notesDirPath, func(path string, d fs.DirEntry, err error) error {

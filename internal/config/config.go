@@ -1,54 +1,67 @@
 package config
 
 import (
+	"encoding/json"
 	"os"
+	"os/user"
 	"path/filepath"
 )
 
-type OolongConfig struct {
-	NotesDirPaths     []string
-	NGramRange        []int
-	PluginPaths       []string
-	AllowedExtensions []string
-}
-
 var config OolongConfig
+
+type OolongConfig struct {
+	NotesDirPaths     []string `json:"noteDirectories"`
+	NGramRange        []int    `json:"ngramRange"`
+	AllowedExtensions []string `json:"allowedExtensions"`
+	PluginPaths       []string `json:"pluginPaths"`
+}
 
 func Config() OolongConfig { return config }
 
 func NotesDirPaths() []string     { return config.NotesDirPaths }
 func NGramRange() []int           { return config.NGramRange }
-func PluginPaths() []string       { return config.PluginPaths }
 func AllowedExtensions() []string { return config.AllowedExtensions }
+func PluginPaths() []string       { return config.PluginPaths }
 
 // TODO: figure out if this should return a mutable pointer or not
 // (probably not, use hot reloading based on file modifications)
 
-// CHANGE: possibly use an init method to set this up
-// TODO: this function should reload config if it changes
-// - watch all entries in .config dir
-func Setup(configDir string) (OolongConfig, error) {
-	// TODO: Read plugins
-	config = OolongConfig{
-		NGramRange:        []int{1, 2, 3},
-		PluginPaths:       []string{"./scripts/daily_note.lua", "./scripts/event_plugin.lua"},
-		NotesDirPaths:     []string{"/home/patrick/notes", "/home/patrick/school/cs5704"},
-		AllowedExtensions: []string{".md", ".mdx", ".tex", ".typ"},
+func Setup(configPath string) (OolongConfig, error) {
+	var err error
+	configPath, err = expand(configPath)
+	if err != nil {
+		panic(err)
 	}
-	// TODO: read config information from lua
+
+	contents, err := os.ReadFile(configPath)
+	if err != nil {
+		panic(err)
+	}
+
+	err = json.Unmarshal(contents, &config)
+	if err != nil {
+		panic(err)
+	}
+
+	for i, dir := range config.NotesDirPaths {
+		d, err := expand(dir)
+		if err != nil {
+			panic(err)
+		}
+		config.NotesDirPaths[i] = d
+	}
+
 	return config, nil
 }
 
-func initWatcher(configDir string) error {
-	filepath.WalkDir(configDir, func(path string, d os.DirEntry, err error) error {
-		if d.IsDir() {
-			return nil
-		}
+func expand(path string) (string, error) {
+	if len(path) == 0 || path[0] != '~' {
+		return path, nil
+	}
 
-		// TODO: possibly use fsnotify for watching for update events
-
-		return err
-	})
-
-	return nil
+	usr, err := user.Current()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(usr.HomeDir, path[1:]), nil
 }
