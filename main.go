@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	cfg, err := config.Setup("./config.lua")
+	cfg, err := config.Setup("~/.oolong.json")
 	if err != nil {
 		fmt.Println(err)
 		return

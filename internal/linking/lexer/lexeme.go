@@ -17,6 +17,22 @@ const (
 	Break
 )
 
+type Zone byte
+
+// DOC:
+const (
+	H1 Zone = iota
+	H2
+	H3
+	H4
+	Bold
+	H5
+	Italic
+	Link
+	Math
+	Default
+)
+
 // DOC:
 type Lexeme struct {
 	Lemma   string
@@ -24,4 +40,5 @@ type Lexeme struct {
 	Row     int
 	Col     int
 	LexType LexType
+	Zone    Zone
 }

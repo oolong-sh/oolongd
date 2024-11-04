@@ -15,7 +15,7 @@ type Document struct {
 	path string
 	// NOTE: this may need to store more information than just weights
 	// - alternatively, the 'Keywords' function could be generated only when needed
-	ngwgts map[string]float32
+	ngwgts map[string]float64
 
 	ngrams map[string]*ngrams.NGram
 	tokens []lexer.Lexeme
@@ -23,7 +23,10 @@ type Document struct {
 
 // Document implementation of Note interface
 func (d *Document) Path() string                       { return d.path }
-func (d *Document) KeywordWeights() map[string]float32 { return d.ngwgts }
+func (d *Document) KeywordWeights() map[string]float64 { return d.ngwgts }
+
+// Implement interface for term frequency calculations
+func (d *Document) NGrams() map[string]*ngrams.NGram { return d.ngrams }
 
 // DOC:
 func ReadDocument(documentPath string) (*Document, error) {
@@ -44,6 +47,7 @@ func ReadDocument(documentPath string) (*Document, error) {
 
 // DOC:
 func readDocument(r io.Reader, documentPath string) (*Document, error) {
+	// TODO: remove stages?
 	initStage := 3
 
 	l := lexer.New()
@@ -57,8 +61,6 @@ func readDocument(r io.Reader, documentPath string) (*Document, error) {
 
 	fmt.Printf("Generating NGrams for %s...\n", documentPath)
 	doc.ngrams = ngrams.Generate(doc.tokens, config.NGramRange(), doc.path)
-	// TODO: multi-pass ngram calculation?
-	// - allow ngram analyzer to handle uppercase chars and symbols
 
 	doc.setWeightsMap()
 
@@ -67,7 +69,7 @@ func readDocument(r io.Reader, documentPath string) (*Document, error) {
 
 // DOC:
 func (d *Document) setWeightsMap() {
-	wgts := make(map[string]float32)
+	wgts := make(map[string]float64)
 	for k, v := range d.ngrams {
 		wgts[k] = v.Weight()
 	}

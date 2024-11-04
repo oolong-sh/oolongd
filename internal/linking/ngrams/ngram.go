@@ -1,7 +1,6 @@
 package ngrams
 
 import (
-	"fmt"
 	"slices"
 	"sort"
 	"sync"
@@ -9,27 +8,16 @@ import (
 	"github.com/oolong-sh/oolong/internal/linking/lexer"
 )
 
-// TODO: NGram rework
-//
-// - need to be able to access ngrams independently of documents (node weight)
-// - need to be able to get weights on a per-document basis
-//
-// - needs to be able to be generated from each document, then merged afterwards
-//   - document struct should be able to support either a map[string]*NGram or []NGram
-//
-// - store keyword/topic/phrase
-// - store global weight
-// - store total count
-// - store map document path -> { document_count, document_weight, document_locations }
-
 // DOC:
 type NGram struct {
 	keyword string
 	n       int
 
 	// weight and count across all documents
-	globalWeight float32
+	globalWeight float64
 	globalCount  int
+	idf          float64
+	zone         lexer.Zone
 
 	// store all documents ngram is present in and info within the document
 	documents map[string]*NGramInfo
@@ -38,8 +26,11 @@ type NGram struct {
 // DOC:
 type NGramInfo struct {
 	DocumentCount     int
-	DocumentWeight    float32
+	DocumentWeight    float64
 	DocumentLocations []location
+	DocumentTF        float64
+	DocumentTfIdf     float64
+	DocumentBM25      float64
 }
 
 type location struct {
@@ -48,12 +39,14 @@ type location struct {
 }
 
 // NGram implements Keyword interface
-func (ng *NGram) Weight() float32                  { return ng.globalWeight }
+func (ng *NGram) Weight() float64                  { return ng.globalWeight }
 func (ng *NGram) Keyword() string                  { return ng.keyword }
 func (ng *NGram) Documents() map[string]*NGramInfo { return ng.documents } // CHANGE: this to return a map of paths to weights?
 
-// TODO: update token type to store stage?
-// TODO: take in interface of options to show stage, document, stage scaling factor
+func (ng *NGram) Count() int   { return ng.globalCount }
+func (ng *NGram) IDF() float64 { return ng.idf }
+
+// DOC:
 func Generate(tokens []lexer.Lexeme, nrange []int, path string) map[string]*NGram {
 	ngrams := make(map[string]*NGram)
 	slices.Sort(nrange)
@@ -70,7 +63,7 @@ func Generate(tokens []lexer.Lexeme, nrange []int, path string) map[string]*NGra
 		// iterate over each size of N
 		wg.Add(len(nrange))
 		for j, n := range nrange {
-			go func(j int, ngmap map[string]*NGram) {
+			go func(j int, n int, ngmap map[string]*NGram) {
 				defer wg.Done()
 				if i+n > len(tokens) {
 					return
@@ -84,8 +77,7 @@ func Generate(tokens []lexer.Lexeme, nrange []int, path string) map[string]*NGra
 
 				// check if ngram is already present in map
 				addNGram(ng, n, ngmap, i, tokens, path)
-				ngmap[ng].updateWeight(1) // CHANGE: only calculate weights after maps are merged?
-			}(j, ngmaps[j])
+			}(j, n, ngmaps[j])
 		}
 		wg.Wait()
 	}
@@ -97,20 +89,24 @@ func Generate(tokens []lexer.Lexeme, nrange []int, path string) map[string]*NGra
 		}
 	}
 
+	// calculate term frequencies
+	tf(ngrams, path)
+
 	return ngrams
 }
 
-// DOC:
-// TEST:
-func Merge(m1, m2 map[string]*NGram) {
-	for k, v2 := range m2 {
-		if v1, ok := m1[k]; !ok {
-			m1[k] = v2
-		} else {
-			v1.globalCount += v2.globalCount
-			v1.globalWeight = (v1.globalWeight + v2.globalWeight) / 2 // TODO: more advanced weight logic
-			for dk, dv := range v2.documents {
-				v1.documents[dk] = dv
+// Merge 2 or more string->*NGram maps
+func Merge(maps ...map[string]*NGram) {
+	for i := 1; i < len(maps); i++ {
+		for k, vi := range maps[i] {
+			if v0, ok := maps[0][k]; !ok {
+				maps[0][k] = vi
+			} else {
+				v0.globalCount += vi.globalCount
+				// v0.globalWeight = (v0.globalWeight + vi.globalWeight) / 2 // TODO: more advanced weight logic
+				for dk, dv := range vi.documents {
+					v0.documents[dk] = dv
+				}
 			}
 		}
 	}
@@ -127,35 +123,28 @@ func Count(ngrams map[string]*NGram) map[string]int {
 	return out
 }
 
-// TEST:
-func OrderByFrequency(counts map[string]int, limit int) []struct {
+// TODO: decide what metric to use here (count vs weight vs idf)
+func OrderByFrequency(m map[string]*NGram) []struct {
 	Key   string
-	Value int
+	Value float64
 } {
 	kvList := make([]struct {
 		Key   string
-		Value int
-	}, 0, len(counts))
+		Value float64
+	}, 0, len(m))
 
 	// Populate the slice with key-value pairs from the map
-	for k, v := range counts {
+	for k, v := range m {
 		kvList = append(kvList, struct {
 			Key   string
-			Value int
-		}{k, v})
+			Value float64
+		}{k, v.globalWeight})
 	}
 
 	// Sort kvList by the values in descending order
 	sort.Slice(kvList, func(i, j int) bool {
-		return kvList[i].Value > kvList[j].Value
+		return kvList[i].Value < kvList[j].Value
 	})
-
-	// Print sorted key-value pairs with values meeting the limit condition
-	for _, kv := range kvList {
-		if kv.Value >= limit {
-			fmt.Printf("%s: %d\n", kv.Key, kv.Value)
-		}
-	}
 
 	return kvList
 }

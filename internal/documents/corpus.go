@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
-	"strings"
 	"sync"
 
 	"github.com/oolong-sh/oolong/internal/config"
@@ -21,18 +20,6 @@ func ReadNotesDir() ([]*Document, error) {
 	documents := []*Document{}
 
 	for _, notesDirPath := range config.NotesDirPaths() {
-		// expand home dir shorthand
-		if strings.HasPrefix(notesDirPath, "~/") || notesDirPath == "~" {
-			home, err := os.UserHomeDir()
-			if err != nil {
-				return nil, err
-			}
-			if notesDirPath == "~" {
-				notesDirPath = home
-			}
-			notesDirPath = filepath.Join(home, notesDirPath[2:])
-		}
-
 		// extract all note file paths from notes directory
 		notePaths := []string{}
 		if err := filepath.WalkDir(notesDirPath, func(path string, d fs.DirEntry, err error) error {
@@ -81,7 +68,7 @@ func ReadNotesDir() ([]*Document, error) {
 			if t.Value == lexer.BreakToken {
 				continue
 			}
-			b = append(b, []byte(t.Lemma+", "+t.Value+"\n")...)
+			b = append(b, []byte(fmt.Sprintf("%s, %s, %d\n", t.Lemma, t.Value, t.Zone))...)
 		}
 	}
 	err := os.WriteFile("./tokens.txt", b, 0666)
@@ -91,24 +78,40 @@ func ReadNotesDir() ([]*Document, error) {
 
 	// TEST: for debugging, remove later
 	b = []byte{}
+	b = append(b, []byte("ngram,weight,count\n")...)
 	ngmap := make(map[string]*ngrams.NGram)
 	for _, d := range documents {
 		ngrams.Merge(ngmap, d.ngrams)
+	}
+	ngrams.CalcWeights(ngmap, len(documents))
+	for _, d := range documents {
 		for _, ng := range d.ngrams {
-			b = append(b, []byte(ng.Keyword()+"\n")...)
+			b = append(b, []byte(fmt.Sprintf("%s, %f, %d\n", ng.Keyword(), ng.Weight(), ng.Count()))...)
 		}
 	}
 	err = os.WriteFile("./ngrams.txt", b, 0666)
 	if err != nil {
 		panic(err)
 	}
+	b = []byte{}
+	b = append(b, []byte("ngram,weight,count,ndocs\n")...)
+	mng := ngrams.FilterMeaningfulNGrams(ngmap, 2, int(float64(len(documents))/1.5), 4.0)
+	for _, s := range mng {
+		b = append(b, []byte(fmt.Sprintf("%s,%f,%d,%d\n", s, ngmap[s].Weight(), ngmap[s].Count(), len(ngmap[s].Documents())))...)
+	}
+	err = os.WriteFile("./meaningful-ngrams.csv", b, 0666)
+	if err != nil {
+		panic(err)
+	}
+	// ngrams.CosineSimilarity(ngmap)
 
 	// TEST: for debugging, remove later
-	ngcounts := ngrams.Count(ngmap)
-	freq := ngrams.OrderByFrequency(ngcounts, 10)
+	// ngcounts := ngrams.Count(ngmap)
+	// freq := ngrams.OrderByFrequency(ngcounts, 10)
+	freq := ngrams.OrderByFrequency(ngmap)
 	b = []byte{}
 	for _, v := range freq {
-		b = append(b, []byte(fmt.Sprintf("%s %v\n", v.Key, v.Value))...)
+		b = append(b, []byte(fmt.Sprintf("%s %f\n", v.Key, v.Value))...)
 	}
 	err = os.WriteFile("./ngram-counts.txt", b, 0666)
 	if err != nil {
