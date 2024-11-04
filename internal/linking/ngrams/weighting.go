@@ -1,6 +1,7 @@
 package ngrams
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/oolong-sh/oolong/internal/linking/lexer"
@@ -72,6 +73,10 @@ func (ng *NGram) updateWeight() {
 	// cdadj := math.Min(0.5*float64(ng.globalCount)/float64(len(ng.documents)), 2)
 
 	adjustment := ladj * cadj * nadj[ng.n] * dadj // * cdadj
+
+	if ng.zone != lexer.Default {
+		fmt.Println(ng.keyword, ng.zone)
+	}
 
 	for _, nginfo := range ng.documents {
 		// TODO: set document weight here
