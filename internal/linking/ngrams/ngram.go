@@ -8,7 +8,7 @@ import (
 	"github.com/oolong-sh/oolong/internal/linking/lexer"
 )
 
-// DOC:
+// NGram type used throughout linking package
 type NGram struct {
 	keyword string
 	n       int
@@ -23,7 +23,7 @@ type NGram struct {
 	documents map[string]*NGramInfo
 }
 
-// DOC:
+// Information about NGram occurences in a single document
 type NGramInfo struct {
 	DocumentCount     int
 	DocumentWeight    float64
@@ -33,20 +33,23 @@ type NGramInfo struct {
 	DocumentBM25      float64
 }
 
+// location type for occurence of an NGram within a document
 type location struct {
 	row int
 	col int
 }
 
 // NGram implements Keyword interface
-func (ng *NGram) Weight() float64                  { return ng.globalWeight }
-func (ng *NGram) Keyword() string                  { return ng.keyword }
-func (ng *NGram) Documents() map[string]*NGramInfo { return ng.documents } // CHANGE: this to return a map of paths to weights?
+func (ng *NGram) Weight() float64 { return ng.globalWeight }
+func (ng *NGram) Keyword() string { return ng.keyword }
 
-func (ng *NGram) Count() int   { return ng.globalCount }
-func (ng *NGram) IDF() float64 { return ng.idf }
+// Non-interface getter methods
+func (ng *NGram) Documents() map[string]*NGramInfo { return ng.documents }
+func (ng *NGram) Count() int                       { return ng.globalCount }
 
-// DOC:
+// func (ng *NGram) IDF() float64                     { return ng.idf }
+
+// Generate NGrams from a slice of document lexemes
 func Generate(tokens []lexer.Lexeme, nrange []int, path string) map[string]*NGram {
 	ngrams := make(map[string]*NGram)
 	slices.Sort(nrange)
@@ -63,6 +66,7 @@ func Generate(tokens []lexer.Lexeme, nrange []int, path string) map[string]*NGra
 		// iterate over each size of N
 		wg.Add(len(nrange))
 		for j, n := range nrange {
+			// check for ngrams of each size in nrange in parallel
 			go func(j int, n int, ngmap map[string]*NGram) {
 				defer wg.Done()
 				if i+n > len(tokens) {
@@ -103,16 +107,16 @@ func Merge(maps ...map[string]*NGram) {
 				maps[0][k] = vi
 			} else {
 				v0.globalCount += vi.globalCount
-				// v0.globalWeight = (v0.globalWeight + vi.globalWeight) / 2 // TODO: more advanced weight logic
 				for dk, dv := range vi.documents {
 					v0.documents[dk] = dv
 				}
+				// weights should be calculated elsewhere after all merges are completed
 			}
 		}
 	}
 }
 
-// DOC:
+// Count occurences of each NGram in a map of NGrams
 func Count(ngrams map[string]*NGram) map[string]int {
 	out := make(map[string]int)
 
@@ -123,7 +127,7 @@ func Count(ngrams map[string]*NGram) map[string]int {
 	return out
 }
 
-// TODO: decide what metric to use here (count vs weight vs idf)
+// Create an slice of NGrams keywords, ordered by their weights
 func OrderByFrequency(m map[string]*NGram) []struct {
 	Key   string
 	Value float64
@@ -148,5 +152,3 @@ func OrderByFrequency(m map[string]*NGram) []struct {
 
 	return kvList
 }
-
-// TODO: functions for filtering less frequent ngrams and stop-words

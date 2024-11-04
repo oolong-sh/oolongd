@@ -23,8 +23,7 @@ func NGramRange() []int           { return config.NGramRange }
 func AllowedExtensions() []string { return config.AllowedExtensions }
 func PluginPaths() []string       { return config.PluginPaths }
 
-// TODO: figure out if this should return a mutable pointer or not
-// (probably not, use hot reloading based on file modifications)
+// TODO: file watcher for config file, reload on change
 
 func Setup(configPath string) (OolongConfig, error) {
 	var err error

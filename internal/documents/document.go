@@ -10,11 +10,9 @@ import (
 	"github.com/oolong-sh/oolong/internal/linking/ngrams"
 )
 
-// DOC:
+// Document type stores lexical tokens and NGrams for a single document
 type Document struct {
-	path string
-	// NOTE: this may need to store more information than just weights
-	// - alternatively, the 'Keywords' function could be generated only when needed
+	path   string
 	ngwgts map[string]float64
 
 	ngrams map[string]*ngrams.NGram
@@ -25,10 +23,8 @@ type Document struct {
 func (d *Document) Path() string                       { return d.path }
 func (d *Document) KeywordWeights() map[string]float64 { return d.ngwgts }
 
-// Implement interface for term frequency calculations
-func (d *Document) NGrams() map[string]*ngrams.NGram { return d.ngrams }
-
-// DOC:
+// Read in a single document file, lex, and generate NGrams
+// Wraps readDocument for explicit use with files
 func ReadDocument(documentPath string) (*Document, error) {
 	f, err := os.Open(documentPath)
 	if err != nil {
@@ -45,14 +41,11 @@ func ReadDocument(documentPath string) (*Document, error) {
 	return d, nil
 }
 
-// DOC:
+// internal reader function that allows usage of io readers for generalized use
 func readDocument(r io.Reader, documentPath string) (*Document, error) {
-	// TODO: remove stages?
-	initStage := 3
-
 	l := lexer.New()
 	fmt.Printf("Running lexer on %s...\n", documentPath)
-	l.Lex(r, initStage)
+	l.Lex(r)
 
 	doc := &Document{
 		path:   documentPath,
@@ -62,16 +55,17 @@ func readDocument(r io.Reader, documentPath string) (*Document, error) {
 	fmt.Printf("Generating NGrams for %s...\n", documentPath)
 	doc.ngrams = ngrams.Generate(doc.tokens, config.NGramRange(), doc.path)
 
+	// FIX: weight setting must occur after document NGRam maps are merged
 	doc.setWeightsMap()
 
 	return doc, nil
 }
 
-// DOC:
+// Generate map of weights for all NGrams found in the document
 func (d *Document) setWeightsMap() {
 	wgts := make(map[string]float64)
 	for k, v := range d.ngrams {
-		wgts[k] = v.Weight()
+		wgts[k] = v.Documents()[d.path].DocumentWeight
 	}
 	d.ngwgts = wgts
 }

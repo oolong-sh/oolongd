@@ -31,7 +31,7 @@ type Lexer struct {
 	Output []Lexeme
 }
 
-// DOC:
+// Initialize a new lexer
 func New() *Lexer {
 	lemmatizer, err := golem.New(en.New())
 	if err != nil {
@@ -49,9 +49,9 @@ func New() *Lexer {
 	}
 }
 
-// DOC:
+// Run lexer on a body of text (passed in as an io.reader for generalized handling)
 // NOTE: could rewrite with regex instead of hardcoded special cases
-func (l *Lexer) Lex(r io.Reader, stage int) {
+func (l *Lexer) Lex(r io.Reader) {
 	l.br = bufio.NewReader(r)
 	isNewline := true
 	for {

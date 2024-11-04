@@ -13,10 +13,8 @@ import (
 	"github.com/oolong-sh/oolong/internal/linking/ngrams"
 )
 
-// TODO: multi-document ngram merge (maps.copy(dest, src))
-
-// DOC:
-func ReadNotesDir() ([]*Document, error) {
+// Read, lex, and extract NGrams for all documents in notes directories specified in config file
+func ReadNotesDirs() ([]*Document, error) {
 	documents := []*Document{}
 
 	for _, notesDirPath := range config.NotesDirPaths() {
@@ -27,11 +25,10 @@ func ReadNotesDir() ([]*Document, error) {
 				return nil
 			}
 
-			// REFACTOR: probably change this to a blacklist
-			// disallow binaries and allow users to blacklist filetypes
 			if slices.Contains(config.AllowedExtensions(), filepath.Ext(path)) {
 				notePaths = append(notePaths, path)
 			}
+
 			return nil
 		}); err != nil {
 			return nil, err
@@ -60,8 +57,10 @@ func ReadNotesDir() ([]*Document, error) {
 		documents = append(documents, docs...)
 	}
 
-	// write out tokens
+	//
 	// TEST: for debugging, remove later
+	//
+	// write out tokens
 	b := []byte{}
 	for _, d := range documents {
 		for _, t := range d.tokens {
@@ -76,7 +75,6 @@ func ReadNotesDir() ([]*Document, error) {
 		panic(err)
 	}
 
-	// TEST: for debugging, remove later
 	b = []byte{}
 	b = append(b, []byte("ngram,weight,count\n")...)
 	ngmap := make(map[string]*ngrams.NGram)
@@ -105,7 +103,6 @@ func ReadNotesDir() ([]*Document, error) {
 	}
 	// ngrams.CosineSimilarity(ngmap)
 
-	// TEST: for debugging, remove later
 	// ngcounts := ngrams.Count(ngmap)
 	// freq := ngrams.OrderByFrequency(ngcounts, 10)
 	freq := ngrams.OrderByFrequency(ngmap)
@@ -117,6 +114,9 @@ func ReadNotesDir() ([]*Document, error) {
 	if err != nil {
 		panic(err)
 	}
+	//
+	// TEST: for debugging, remove later
+	//
 
 	return documents, nil
 }

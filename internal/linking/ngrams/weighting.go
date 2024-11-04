@@ -6,6 +6,7 @@ import (
 	"github.com/oolong-sh/oolong/internal/linking/lexer"
 )
 
+// Weight adjustment multipliers for NGram sizes
 var nadj map[int]float64 = map[int]float64{
 	1: 0.6,
 	2: 1.5,
@@ -14,6 +15,7 @@ var nadj map[int]float64 = map[int]float64{
 	5: 0.6,
 }
 
+// Zone adjustments for k1 in bm25f calculations
 var zoneK1 map[lexer.Zone]float64 = map[lexer.Zone]float64{
 	lexer.Default: 1.1,
 	lexer.H1:      2.2,
@@ -25,6 +27,8 @@ var zoneK1 map[lexer.Zone]float64 = map[lexer.Zone]float64{
 	lexer.Italic:  1.3,
 	lexer.Link:    1.2,
 }
+
+// Zone adjustments for b in bm25f calculations
 var zoneB map[lexer.Zone]float64 = map[lexer.Zone]float64{
 	lexer.Default: 0.9,
 	lexer.H1:      0.2,
@@ -37,7 +41,8 @@ var zoneB map[lexer.Zone]float64 = map[lexer.Zone]float64{
 	lexer.Link:    0.8,
 }
 
-// TODO: finish this function
+// Calculate weights for ngrams found in a map of NGrams across N documents
+// To be used after all document NGram maps are merged
 func CalcWeights(ngmap map[string]*NGram, N int) {
 	idf(ngmap, N)
 	// tfidf(ngmap)
@@ -53,7 +58,7 @@ func CalcWeights(ngmap map[string]*NGram, N int) {
 	}
 }
 
-// DOC:
+// Update weights for an individual NGram instance
 func (ng *NGram) updateWeight() {
 	w := 0.0
 	df := 0.01
@@ -64,9 +69,9 @@ func (ng *NGram) updateWeight() {
 	cadj := math.Min(0.1*float64(ng.n)*float64(ng.globalCount), 1.5) // count adjustment
 	dadj := math.Min(0.11*float64(ng.n)*float64(len(ng.documents)), 2)
 	// TODO: heavily prefer count / len(dg.documents) > 1
-	cdadj := math.Min(0.5*float64(ng.globalCount)/float64(len(ng.documents)), 2)
+	// cdadj := math.Min(0.5*float64(ng.globalCount)/float64(len(ng.documents)), 2)
 
-	adjustment := ladj * cadj * nadj[ng.n] * dadj * cdadj
+	adjustment := ladj * cadj * nadj[ng.n] * dadj // * cdadj
 
 	for _, nginfo := range ng.documents {
 		// TODO: set document weight here

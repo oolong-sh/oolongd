@@ -4,6 +4,7 @@ var BreakToken = "__BREAK__"
 
 type LexType byte
 
+// Lexeme type enum for use in lexer
 const (
 	EOF LexType = iota
 	Word
@@ -19,7 +20,8 @@ const (
 
 type Zone byte
 
-// DOC:
+// Zone enum used in weights calculations
+// (Ordered from most significant to least signficant)
 const (
 	H1 Zone = iota
 	H2
@@ -33,12 +35,11 @@ const (
 	Default
 )
 
-// DOC:
 type Lexeme struct {
-	Lemma   string
-	Value   string
-	Row     int
-	Col     int
-	LexType LexType
-	Zone    Zone
+	Lemma   string  // lexical root of unit (i.e. continues -> continue)
+	Value   string  // lexical unit
+	Row     int     // row location in file
+	Col     int     // column location of first character in file
+	LexType LexType // type of lexical unit
+	Zone    Zone    // document zone
 }

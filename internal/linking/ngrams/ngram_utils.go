@@ -1,7 +1,6 @@
 package ngrams
 
 import (
-	"fmt"
 	"slices"
 	"strings"
 
@@ -12,35 +11,40 @@ import (
 func addNGram(k string, n int, ngmap map[string]*NGram, i int, tokens []lexer.Lexeme, path string) {
 	if ngram, ok := ngmap[k]; ok {
 		ngram.globalCount++
+
 		doc := ngram.documents[path]
 		doc.DocumentCount++
 		doc.DocumentLocations = append(doc.DocumentLocations, location{row: tokens[i].Row, col: tokens[i].Col})
-		// TODO: possibly remove this
+
+		// update ngram zone if current is considered more valuable
 		if tokens[i].Zone < ngram.zone {
 			ngram.zone = tokens[i].Zone
 		}
 	} else {
 		documents := make(map[string]*NGramInfo)
+
+		// create document info struct for ngram
 		documents[path] = &NGramInfo{
 			DocumentCount:     1,
-			DocumentWeight:    0, // REFACTOR: not currently being used -> use bm25 for this?
+			DocumentWeight:    0,
 			DocumentLocations: []location{{row: tokens[i].Row, col: tokens[i].Col}},
 		}
+
+		// create ngram
 		ngmap[k] = &NGram{
 			keyword:     k,
 			n:           n,
 			globalCount: 1,
 			documents:   documents,
-			zone:        tokens[i].Zone, // NOTE: maybe get rid of this later
+			zone:        tokens[i].Zone,
 		}
 	}
 }
 
-// DOC:
+// Join lexeme items together to form an ngram of length len(nTokens)
+// Will return an empty string if stopwords, break tokens, or zone changes occur
 func joinNElements(nTokens []lexer.Lexeme) string {
 	var parts []string
-
-	// TODO: add handling of different lexeme types (i.e. disallow links)
 
 	// check for outer stop words -> skip ngram
 	if slices.Contains(stopWords, strings.ToLower(nTokens[0].Lemma)) ||
@@ -60,19 +64,19 @@ func joinNElements(nTokens []lexer.Lexeme) string {
 		if t.LexType == lexer.Break {
 			return ""
 		}
+
+		// TODO: add handling of different lexeme types (i.e. disallow links)
+
 		// return early if tokens are spread across multiple zones
+		// TODO: allow zone changes from bold/italic -> default (but not h1 -> default)
 		if t.Zone != zone {
 			return ""
 		}
 
-		// NOTE: choose between Value and Lemma here
+		// Either value or lemmatized value can be used here, the lemma is likely the better choice
 		// parts = append(parts, strings.ToLower(t.Value))
 		parts = append(parts, strings.ToLower(t.Lemma))
 	}
 
-	out := strings.Join(parts, " ")
-	if out == "the author" {
-		fmt.Println(nTokens)
-	}
-	return out
+	return strings.Join(parts, " ")
 }

@@ -11,10 +11,7 @@ import (
 	"github.com/oolong-sh/oolong/internal/linking/lexer"
 )
 
-var (
-	cfg   config.OolongConfig
-	stage = 3
-)
+var cfg config.OolongConfig
 
 func init() {
 	var err error
@@ -29,7 +26,7 @@ func TestReadDocumentSimple(t *testing.T) {
 	s := "Hello world!"
 	var rd io.Reader = strings.NewReader(s)
 	l := lexer.New()
-	l.Lex(rd, stage)
+	l.Lex(rd)
 
 	fmt.Println("Input:", s, "Output:", l.Output)
 	if len(l.Output) != 2 {
@@ -58,7 +55,7 @@ func TestReadDocumentSimple(t *testing.T) {
 	s = "Hello, \nworld!"
 	rd = strings.NewReader(s)
 	l = lexer.New()
-	l.Lex(rd, stage)
+	l.Lex(rd)
 	fmt.Println("Input:", s, " Output:", l.Output)
 	if len(l.Output) != 3 {
 		t.Fatalf("Incorrect output length. Expected %d, got %d", 3, len(l.Output))
@@ -92,7 +89,7 @@ func TestReadDocumentSimple(t *testing.T) {
 	// test with many newlines and multiple single-line lexemes
 	s = "\nHello, \nworld! Foo-bar baz   \n\n foo"
 	rd = strings.NewReader(s)
-	l.Lex(rd, stage)
+	l.Lex(rd)
 	l = lexer.New()
 	fmt.Println("Input:", s, " Output:", l.Output)
 	if len(l.Output) != 9 {
