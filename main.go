@@ -1,12 +1,15 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 
 	"github.com/oolong-sh/oolong/internal/config"
 	"github.com/oolong-sh/oolong/internal/daemon"
 	"github.com/oolong-sh/oolong/internal/documents"
 )
+
+var daemonFlag = flag.Bool("no-daemon", false, "Run Oolong in no-daemon mode (not recommended)")
 
 func main() {
 	cfg, err := config.Setup("~/.oolong.json")
@@ -16,12 +19,14 @@ func main() {
 	}
 	fmt.Println(cfg.PluginPaths)
 
-	d, err := documents.ReadNotesDirs()
+	_, err = documents.ReadNotesDirs()
 	if err != nil {
 		return
 	}
-	_ = d
 
-	// plugins.InitPlugins(&cfg)
-	daemon.Run()
+	// go plugins.InitPlugins(&cfg)
+	flag.Parse()
+	if !*daemonFlag {
+		daemon.Run()
+	}
 }
