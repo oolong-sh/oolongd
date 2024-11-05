@@ -5,8 +5,10 @@ import (
 	"io/fs"
 	"log"
 	"path/filepath"
+	"slices"
 
 	"github.com/fsnotify/fsnotify"
+	"github.com/oolong-sh/oolong/internal/config"
 )
 
 // Initialize and run file update watcher for notes directories
@@ -17,16 +19,27 @@ func runNotesDirsWatcher(dirs ...string) error {
 	}
 	defer watcher.Close()
 
+	dirIgnores := config.IgnoredDirectories()
+
 	for _, dir := range dirs {
 		// TODO: add oolong ignore system to blacklist certain subdirs/files
 		if err = filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
-			if d.IsDir() {
-				err = watcher.Add(path)
-				if err != nil {
-					return err
-				}
-				log.Println("Added watcher on", path)
+			if !d.IsDir() {
+				return nil
 			}
+
+			// NOTE: this may not be the exact desired behavior for ignores
+			// - this logic also needs to be replicated in the document reader
+			if slices.Contains(dirIgnores, filepath.Base(path)) {
+				return filepath.SkipDir
+			}
+
+			err = watcher.Add(path)
+			if err != nil {
+				return err
+			}
+			log.Println("Added watcher on", path)
+
 			return nil
 		}); err != nil {
 			return err
@@ -57,7 +70,6 @@ func runNotesDirsWatcher(dirs ...string) error {
 		}
 	}
 	// }()
-
 	// <-make(chan struct{})
 	// return nil
 }
