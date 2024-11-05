@@ -14,7 +14,7 @@ func addNGram(k string, n int, ngmap map[string]*NGram, i int, tokens []lexer.Le
 
 		doc := ngram.documents[path]
 		doc.DocumentCount++
-		doc.DocumentLocations = append(doc.DocumentLocations, location{row: tokens[i].Row, col: tokens[i].Col})
+		// doc.DocumentLocations = append(doc.DocumentLocations, location{row: tokens[i].Row, col: tokens[i].Col})
 
 		// update ngram zone if current is considered more valuable
 		if tokens[i].Zone < ngram.zone {
@@ -25,9 +25,9 @@ func addNGram(k string, n int, ngmap map[string]*NGram, i int, tokens []lexer.Le
 
 		// create document info struct for ngram
 		documents[path] = &NGramInfo{
-			DocumentCount:     1,
-			DocumentWeight:    0,
-			DocumentLocations: []location{{row: tokens[i].Row, col: tokens[i].Col}},
+			DocumentCount:  1,
+			DocumentWeight: 0,
+			// DocumentLocations: []location{{row: tokens[i].Row, col: tokens[i].Col}},
 		}
 
 		// create ngram

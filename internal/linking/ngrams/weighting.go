@@ -1,7 +1,6 @@
 package ngrams
 
 import (
-	"fmt"
 	"math"
 
 	"github.com/oolong-sh/oolong/internal/linking/lexer"
@@ -66,22 +65,19 @@ func (ng *NGram) updateWeight() {
 
 	// TODO: these numbers are subject to change
 	// - document and count adjustments are too high for n=1
-	ladj := math.Min(0.1*float64(len(ng.keyword)), 1.1)              // length adjustment
-	cadj := math.Min(0.1*float64(ng.n)*float64(ng.globalCount), 1.5) // count adjustment
-	dadj := math.Min(0.11*float64(ng.n)*float64(len(ng.documents)), 2)
+	ladj := math.Min(0.12*float64(len(ng.keyword)), 1.2)                 // length adjustment
+	cadj := math.Min(0.08*float64(ng.n)*float64(ng.globalCount), 1.5)    // count adjustment
+	dadj := math.Min(0.08*float64(ng.n)*float64(len(ng.documents)), 1.8) // document occurence adjustment
 	// TODO: heavily prefer count / len(dg.documents) > 1
 	// cdadj := math.Min(0.5*float64(ng.globalCount)/float64(len(ng.documents)), 2)
 
 	adjustment := ladj * cadj * nadj[ng.n] * dadj // * cdadj
 
-	if ng.zone != lexer.Default {
-		fmt.Println(ng.keyword, ng.zone)
-	}
-
 	for _, nginfo := range ng.documents {
-		// TODO: set document weight here
-		nginfo.DocumentWeight = nginfo.DocumentBM25 * adjustment
-		w += nginfo.DocumentBM25
+		// documentWeight will be bm25 or tf-idf before this point
+		// apply adjustment to document weight
+		nginfo.DocumentWeight = nginfo.DocumentWeight * adjustment
+		w += nginfo.DocumentWeight
 		df++
 	}
 

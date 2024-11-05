@@ -20,6 +20,7 @@ func ReadNotesDirs() ([]*Document, error) {
 	for _, notesDirPath := range config.NotesDirPaths() {
 		// extract all note file paths from notes directory
 		notePaths := []string{}
+		// TODO: add oolong ignore system to blacklist certain subdirs/files
 		if err := filepath.WalkDir(notesDirPath, func(path string, d fs.DirEntry, err error) error {
 			if d.IsDir() {
 				return nil

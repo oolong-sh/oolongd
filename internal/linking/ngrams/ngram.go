@@ -25,12 +25,12 @@ type NGram struct {
 
 // Information about NGram occurences in a single document
 type NGramInfo struct {
-	DocumentCount     int
-	DocumentWeight    float64
-	DocumentLocations []location
-	DocumentTF        float64
-	DocumentTfIdf     float64
-	DocumentBM25      float64
+	DocumentCount  int
+	DocumentWeight float64
+	// DocumentLocations []location
+	// DocumentTF        float64
+	// DocumentTfIdf     float64
+	// DocumentBM25      float64
 }
 
 // location type for occurence of an NGram within a document
@@ -94,7 +94,7 @@ func Generate(tokens []lexer.Lexeme, nrange []int, path string) map[string]*NGra
 	}
 
 	// calculate term frequencies
-	tf(ngrams, path)
+	// tf(ngrams, path) // using count instead
 
 	return ngrams
 }

@@ -32,9 +32,9 @@ func (l *Lexer) push(v LexType) {
 	switch v {
 	case Break:
 		l.Output = append(l.Output, Lexeme{
-			Value:   BreakToken,
-			Row:     l.row,
-			Col:     l.col,
+			Value: BreakToken,
+			// Row:     l.row,
+			// Col:     l.col,
 			LexType: Break,
 			Zone:    l.zone,
 		})
@@ -48,9 +48,9 @@ func (l *Lexer) push(v LexType) {
 		l.Output = append(l.Output, Lexeme{
 			Lemma: lemma,
 			Value: word,
-			Row:   l.row,
+			// Row:   l.row,
 			// FIX: handles removed characters incorrectly in calculation (what start is probably supposed to used be for)
-			Col: l.col - 1 - len(word),
+			// Col: l.col - 1 - len(word),
 			// Col:     l.col - l.start,
 			LexType: Word,
 			Zone:    l.zone,

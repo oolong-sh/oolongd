@@ -43,7 +43,7 @@ func CosineSimilarity(ngmap map[string]*NGram) {
 	}
 }
 
-// Construct tf-idf score vectors
+// Construct weighting score vectors
 func constructDocumentVectors(ngmap map[string]*NGram) map[string]map[string]float64 {
 	documentVectors := make(map[string]map[string]float64)
 
@@ -52,7 +52,7 @@ func constructDocumentVectors(ngmap map[string]*NGram) map[string]map[string]flo
 			if _, exists := documentVectors[doc]; !exists {
 				documentVectors[doc] = make(map[string]float64)
 			}
-			documentVectors[doc][ngram.keyword] = nginfo.DocumentTfIdf
+			documentVectors[doc][ngram.keyword] = nginfo.DocumentWeight
 		}
 	}
 

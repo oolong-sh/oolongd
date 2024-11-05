@@ -5,19 +5,19 @@ import (
 )
 
 // Calculate term frequency
-func tf(ngmap map[string]*NGram, path string) {
-	// totalCount := 0
-	// for _, ng := range ngmap {
-	// 	totalCount += ng.documents[path].DocumentCount
-	// }
-
-	for _, ng := range ngmap {
-		nginfo := ng.documents[path]
-		// normalize by document token count
-		// nginfo.DocumentTF = float64(nginfo.DocumentCount) / float64(totalCount)
-		nginfo.DocumentTF = float64(nginfo.DocumentCount)
-	}
-}
+// func tf(ngmap map[string]*NGram, path string) {
+// 	// totalCount := 0
+// 	// for _, ng := range ngmap {
+// 	// 	totalCount += ng.documents[path].DocumentCount
+// 	// }
+//
+// 	for _, ng := range ngmap {
+// 		nginfo := ng.documents[path]
+// 		// normalize by document token count
+// 		// nginfo.DocumentTF = float64(nginfo.DocumentCount) / float64(totalCount)
+// 		nginfo.DocumentTF = float64(nginfo.DocumentCount)
+// 	}
+// }
 
 // Calculate inverse document frequency of NGrams
 // N is the total number of documents in the text corpus
@@ -42,7 +42,8 @@ func idf(ngmap map[string]*NGram, N int) {
 func tfidf(ngmap map[string]*NGram) {
 	for _, ng := range ngmap {
 		for _, nginfo := range ng.documents {
-			nginfo.DocumentTfIdf = nginfo.DocumentTF * ng.idf
+			// nginfo.DocumentTfIdf = nginfo.DocumentTF * ng.idf
+			nginfo.DocumentWeight = float64(nginfo.DocumentCount) * ng.idf
 		}
 	}
 }
@@ -73,7 +74,8 @@ func bm25(ngmap map[string]*NGram) {
 		b = zoneB[ng.zone]
 		k1 = zoneK1[ng.zone]
 		for path, nginfo := range ng.documents {
-			nginfo.DocumentBM25 = ng.idf * ((nginfo.DocumentTF * (k1 + 1)) / (nginfo.DocumentTF + k1*(1-b+b*(d[path]/davg))))
+			tf := float64(nginfo.DocumentCount)
+			nginfo.DocumentWeight = ng.idf * ((tf * (k1 + 1)) / (tf + k1*(1-b+b*(d[path]/davg))))
 		}
 	}
 }

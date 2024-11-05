@@ -23,7 +23,7 @@ Oolong looks for a configuration file at `~/.oolong.json`
         3
     ],
     "noteDirectories": [
-        "~/notes",
+        "~/notes"
     ],
     "allowedExtensions": [
         ".md",

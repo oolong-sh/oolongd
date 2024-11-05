@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/oolong-sh/oolong/internal/config"
+	"github.com/oolong-sh/oolong/internal/daemon"
 	"github.com/oolong-sh/oolong/internal/documents"
 )
 
@@ -22,4 +23,5 @@ func main() {
 	_ = d
 
 	// plugins.InitPlugins(&cfg)
+	daemon.Run()
 }
