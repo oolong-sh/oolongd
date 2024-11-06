@@ -19,7 +19,7 @@ func main() {
 	}
 	fmt.Println(cfg.PluginPaths)
 
-	_, err = documents.ReadNotesDirs()
+	err = documents.ReadNotesDirs()
 	if err != nil {
 		return
 	}

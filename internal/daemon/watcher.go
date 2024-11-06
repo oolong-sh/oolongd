@@ -6,9 +6,11 @@ import (
 	"log"
 	"path/filepath"
 	"slices"
+	"time"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/oolong-sh/oolong/internal/config"
+	"github.com/oolong-sh/oolong/internal/documents"
 )
 
 // Initialize and run file update watcher for notes directories
@@ -34,6 +36,7 @@ func runNotesDirsWatcher(dirs ...string) error {
 				return filepath.SkipDir
 			}
 
+			// TEST: this may need to add path as absolute to get correct results
 			err = watcher.Add(path)
 			if err != nil {
 				return err
@@ -55,12 +58,17 @@ func runNotesDirsWatcher(dirs ...string) error {
 				log.Println("Watcher event channel returned bad result.")
 				return errors.New("Invalid watcher errors channel value.")
 			}
-			log.Println("Event:", event)
+			// log.Println("Event:", event)
 
-			// TODO: call functions on document update
-			// - has potential performance impacts, so only rerun what is needed (i.e. lex single doc + weight updates)
 			if event.Has(fsnotify.Write) {
 				log.Println("Modified file:", event.Name)
+
+				// write event is sent on write start, wait 500ms for write to finish
+				time.Sleep(500)
+
+				// re-read document
+				documents.ReadDocuments(event.Name)
+				// TODO: add dedup timer to prevent multi-write calls
 			}
 		case err, ok := <-watcher.Errors:
 			if !ok {

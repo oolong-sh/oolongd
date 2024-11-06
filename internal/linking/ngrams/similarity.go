@@ -1,7 +1,7 @@
 package ngrams
 
 import (
-	"fmt"
+	"log"
 	"math"
 )
 
@@ -38,7 +38,7 @@ func CosineSimilarity(ngmap map[string]*NGram) {
 			}
 			similarity := calculateCosineSimilarity(vec1, vec2)
 			// TODO: do something other than print here? -- (if this actually ends up being used)
-			fmt.Printf("%s, %s, %.4f\n", doc1, doc2, similarity)
+			log.Printf("%s, %s, %.4f\n", doc1, doc2, similarity)
 		}
 	}
 }

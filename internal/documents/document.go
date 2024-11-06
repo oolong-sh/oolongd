@@ -1,8 +1,8 @@
 package documents
 
 import (
-	"fmt"
 	"io"
+	"log"
 	"os"
 
 	"github.com/oolong-sh/oolong/internal/config"
@@ -25,7 +25,7 @@ func (d *Document) KeywordWeights() map[string]float64 { return d.ngwgts }
 
 // Read in a single document file, lex, and generate NGrams
 // Wraps readDocument for explicit use with files
-func ReadDocument(documentPath string) (*Document, error) {
+func readDocumentByFile(documentPath string) (*Document, error) {
 	f, err := os.Open(documentPath)
 	if err != nil {
 		return nil, err
@@ -44,7 +44,7 @@ func ReadDocument(documentPath string) (*Document, error) {
 // internal reader function that allows usage of io readers for generalized use
 func readDocument(r io.Reader, documentPath string) (*Document, error) {
 	l := lexer.New()
-	fmt.Printf("Running lexer on %s...\n", documentPath)
+	log.Printf("Running lexer on %s...\n", documentPath)
 	l.Lex(r)
 
 	doc := &Document{
@@ -52,7 +52,7 @@ func readDocument(r io.Reader, documentPath string) (*Document, error) {
 		tokens: l.Output,
 	}
 
-	fmt.Printf("Generating NGrams for %s...\n", documentPath)
+	log.Printf("Generating NGrams for %s...\n", documentPath)
 	doc.ngrams = ngrams.Generate(doc.tokens, config.NGramRange(), doc.path)
 
 	// FIX: weight setting must occur after document NGRam maps are merged

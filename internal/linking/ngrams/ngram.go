@@ -104,13 +104,15 @@ func Merge(maps ...map[string]*NGram) {
 	for i := 1; i < len(maps); i++ {
 		for k, vi := range maps[i] {
 			if v0, ok := maps[0][k]; !ok {
+				// ngram key not found in main map, add it
 				maps[0][k] = vi
 			} else {
+				// ngram key found in map, merge counts and document info
+				// weights should be calculated elsewhere after all merges are completed
 				v0.globalCount += vi.globalCount
 				for dk, dv := range vi.documents {
 					v0.documents[dk] = dv
 				}
-				// weights should be calculated elsewhere after all merges are completed
 			}
 		}
 	}

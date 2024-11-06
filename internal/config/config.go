@@ -14,7 +14,7 @@ type OolongConfig struct {
 	NGramRange        []int    `json:"ngramRange"`
 	AllowedExtensions []string `json:"allowedExtensions"`
 	PluginPaths       []string `json:"pluginPaths"`
-	IgnoreDirectories []string `json:"ignoreDirectories"`
+	IgnoreDirectories []string `json:"ignoredDirectories"`
 }
 
 func Config() OolongConfig { return config }
