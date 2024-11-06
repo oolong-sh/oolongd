@@ -1,7 +1,9 @@
 package documents
 
 import (
+	"fmt"
 	"log"
+	"os"
 
 	"github.com/oolong-sh/oolong/internal/linking/ngrams"
 )
@@ -38,6 +40,22 @@ func updateState(docs []*Document) error {
 	// calculate weights
 	ngrams.CalcWeights(state.NGrams, len(state.Documents))
 	log.Println("Done calculating weights.")
+
+	//
+	// TEST: remove later
+	//
+	state := State()
+	b := append([]byte{}, []byte("ngram,weight,count,ndocs\n")...)
+	mng := ngrams.FilterMeaningfulNGrams(state.NGrams, 2, int(float64(len(state.Documents))/1.5), 4.0)
+	for _, s := range mng {
+		b = append(b, []byte(fmt.Sprintf("%s,%f,%d,%d\n", s, state.NGrams[s].Weight(), state.NGrams[s].Count(), len(state.NGrams[s].Documents())))...)
+	}
+	if err := os.WriteFile("./meaningful-ngrams.csv", b, 0666); err != nil {
+		panic(err)
+	}
+	//
+	// TEST: remove later
+	//
 
 	// TODO: other things? (file writes?)
 

@@ -12,7 +12,7 @@ import (
 var daemonFlag = flag.Bool("no-daemon", false, "Run Oolong in no-daemon mode (not recommended)")
 
 func main() {
-	cfg, err := config.Setup("~/.oolong.json")
+	cfg, err := config.Setup("~/.config/oolong.toml")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -25,6 +25,7 @@ func main() {
 	}
 
 	// go plugins.InitPlugins(&cfg)
+
 	flag.Parse()
 	if !*daemonFlag {
 		daemon.Run()

@@ -1,20 +1,21 @@
 package config
 
 import (
-	"encoding/json"
 	"os"
 	"os/user"
 	"path/filepath"
+
+	"github.com/BurntSushi/toml"
 )
 
 var config OolongConfig
 
 type OolongConfig struct {
-	NotesDirPaths     []string `json:"noteDirectories"`
-	NGramRange        []int    `json:"ngramRange"`
-	AllowedExtensions []string `json:"allowedExtensions"`
-	PluginPaths       []string `json:"pluginPaths"`
-	IgnoreDirectories []string `json:"ignoredDirectories"`
+	NotesDirPaths     []string `toml:"note_directories"`
+	NGramRange        []int    `toml:"ngram_range"`
+	AllowedExtensions []string `toml:"allowed_extensions"`
+	PluginPaths       []string `toml:"plugin_paths"`
+	IgnoreDirectories []string `toml:"ignored_directories"`
 }
 
 func Config() OolongConfig { return config }
@@ -39,7 +40,7 @@ func Setup(configPath string) (OolongConfig, error) {
 		panic(err)
 	}
 
-	err = json.Unmarshal(contents, &config)
+	err = toml.Unmarshal(contents, &config)
 	if err != nil {
 		panic(err)
 	}
