@@ -15,7 +15,7 @@ var cfg config.OolongConfig
 
 func init() {
 	var err error
-	cfg, err = config.Setup("")
+	cfg, err = config.Setup("../../../examples/oolong.json")
 	if err != nil {
 		panic(err)
 	}
@@ -34,17 +34,19 @@ func TestReadDocumentSimple(t *testing.T) {
 	}
 	expectedTokens := []lexer.Lexeme{
 		{
-			Lemma:   "hello",
-			Value:   "Hello",
-			Row:     1,
-			Col:     1,
+			Lemma: "hello",
+			Value: "Hello",
+			// Row:     1,
+			// Col:     1,
 			LexType: lexer.Word,
+			Zone:    lexer.Default,
 		}, {
-			Lemma:   "world",
-			Value:   "world",
-			Row:     1,
-			Col:     7,
+			Lemma: "world",
+			Value: "world",
+			// Row:     1,
+			// Col:     7,
 			LexType: lexer.Word,
+			Zone:    lexer.Default,
 		},
 	}
 	if !slices.Equal(l.Output, expectedTokens) {
@@ -62,24 +64,27 @@ func TestReadDocumentSimple(t *testing.T) {
 	}
 	expectedTokens = []lexer.Lexeme{
 		{
-			Lemma:   "hello",
-			Value:   "Hello",
-			Row:     1,
-			Col:     1,
+			Lemma: "hello",
+			Value: "Hello",
+			// Row:     1,
+			// Col:     1,
 			LexType: lexer.Word,
+			Zone:    lexer.Default,
 		},
 		{
-			Value:   lexer.BreakToken,
-			Row:     1,
-			Col:     8,
+			Value: lexer.BreakToken,
+			// Row:     1,
+			// Col:     8,
 			LexType: lexer.Break,
+			Zone:    lexer.Default,
 		},
 		{
-			Lemma:   "world",
-			Value:   "World",
-			Row:     2,
-			Col:     1,
+			Lemma: "world",
+			Value: "world",
+			// Row:     2,
+			// Col:     1,
 			LexType: lexer.Word,
+			Zone:    lexer.Default,
 		},
 	}
 	if !slices.Equal(l.Output, expectedTokens) {
@@ -89,8 +94,8 @@ func TestReadDocumentSimple(t *testing.T) {
 	// test with many newlines and multiple single-line lexemes
 	s = "\nHello, \nworld! Foo-bar baz   \n\n foo"
 	rd = strings.NewReader(s)
-	l.Lex(rd)
 	l = lexer.New()
+	l.Lex(rd)
 	fmt.Println("Input:", s, " Output:", l.Output)
 	if len(l.Output) != 9 {
 		t.Fatalf("Incorrect Document.Content length. Expected %d, got %d", 5, len(l.Output))

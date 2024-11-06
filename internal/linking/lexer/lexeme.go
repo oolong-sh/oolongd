@@ -36,10 +36,10 @@ const (
 )
 
 type Lexeme struct {
-	Lemma   string  // lexical root of unit (i.e. continues -> continue)
-	Value   string  // lexical unit
-	Row     int     // row location in file
-	Col     int     // column location of first character in file
+	Lemma string // lexical root of unit (i.e. continues -> continue)
+	Value string // lexical unit
+	// Row     int     // row location in file
+	// Col     int     // column location of first character in file
 	LexType LexType // type of lexical unit
 	Zone    Zone    // document zone
 }

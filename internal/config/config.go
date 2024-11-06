@@ -14,14 +14,16 @@ type OolongConfig struct {
 	NGramRange        []int    `json:"ngramRange"`
 	AllowedExtensions []string `json:"allowedExtensions"`
 	PluginPaths       []string `json:"pluginPaths"`
+	IgnoreDirectories []string `json:"ignoredDirectories"`
 }
 
 func Config() OolongConfig { return config }
 
-func NotesDirPaths() []string     { return config.NotesDirPaths }
-func NGramRange() []int           { return config.NGramRange }
-func AllowedExtensions() []string { return config.AllowedExtensions }
-func PluginPaths() []string       { return config.PluginPaths }
+func NotesDirPaths() []string      { return config.NotesDirPaths }
+func NGramRange() []int            { return config.NGramRange }
+func AllowedExtensions() []string  { return config.AllowedExtensions }
+func PluginPaths() []string        { return config.PluginPaths }
+func IgnoredDirectories() []string { return config.IgnoreDirectories }
 
 // TODO: file watcher for config file, reload on change
 

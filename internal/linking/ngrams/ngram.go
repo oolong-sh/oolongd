@@ -25,12 +25,12 @@ type NGram struct {
 
 // Information about NGram occurences in a single document
 type NGramInfo struct {
-	DocumentCount     int
-	DocumentWeight    float64
-	DocumentLocations []location
-	DocumentTF        float64
-	DocumentTfIdf     float64
-	DocumentBM25      float64
+	DocumentCount  int
+	DocumentWeight float64
+	// DocumentLocations []location
+	// DocumentTF        float64
+	// DocumentTfIdf     float64
+	// DocumentBM25      float64
 }
 
 // location type for occurence of an NGram within a document
@@ -94,7 +94,7 @@ func Generate(tokens []lexer.Lexeme, nrange []int, path string) map[string]*NGra
 	}
 
 	// calculate term frequencies
-	tf(ngrams, path)
+	// tf(ngrams, path) // using count instead
 
 	return ngrams
 }
@@ -104,13 +104,15 @@ func Merge(maps ...map[string]*NGram) {
 	for i := 1; i < len(maps); i++ {
 		for k, vi := range maps[i] {
 			if v0, ok := maps[0][k]; !ok {
+				// ngram key not found in main map, add it
 				maps[0][k] = vi
 			} else {
+				// ngram key found in map, merge counts and document info
+				// weights should be calculated elsewhere after all merges are completed
 				v0.globalCount += vi.globalCount
 				for dk, dv := range vi.documents {
 					v0.documents[dk] = dv
 				}
-				// weights should be calculated elsewhere after all merges are completed
 			}
 		}
 	}

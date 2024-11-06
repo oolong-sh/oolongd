@@ -1,7 +1,7 @@
 package ngrams
 
 import (
-	"fmt"
+	"log"
 	"math"
 )
 
@@ -38,12 +38,12 @@ func CosineSimilarity(ngmap map[string]*NGram) {
 			}
 			similarity := calculateCosineSimilarity(vec1, vec2)
 			// TODO: do something other than print here? -- (if this actually ends up being used)
-			fmt.Printf("%s, %s, %.4f\n", doc1, doc2, similarity)
+			log.Printf("%s, %s, %.4f\n", doc1, doc2, similarity)
 		}
 	}
 }
 
-// Construct tf-idf score vectors
+// Construct weighting score vectors
 func constructDocumentVectors(ngmap map[string]*NGram) map[string]map[string]float64 {
 	documentVectors := make(map[string]map[string]float64)
 
@@ -52,7 +52,7 @@ func constructDocumentVectors(ngmap map[string]*NGram) map[string]map[string]flo
 			if _, exists := documentVectors[doc]; !exists {
 				documentVectors[doc] = make(map[string]float64)
 			}
-			documentVectors[doc][ngram.keyword] = nginfo.DocumentTfIdf
+			documentVectors[doc][ngram.keyword] = nginfo.DocumentWeight
 		}
 	}
 

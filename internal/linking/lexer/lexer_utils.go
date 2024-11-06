@@ -11,13 +11,17 @@ var eof rune = -1
 
 var (
 	// Heading (e.g., # Heading, ## Heading) - only matches standalone heading lines
-	headingPattern = regexp.MustCompile(`^(#{1,6})\s+(.+?)\s*$`)
+	// (?m) is required to allow matching from start/end of line rather than start/end of string
+	// FIX: these capture groups are sometimes wrapping around lines (probably abandon regex and use more advanced lexer logic)
+	h1Pattern = regexp.MustCompile(`(?m)^(#)\s+(.+?)\s*$`)
+	h2Pattern = regexp.MustCompile(`(?m)^(#{2})\s+(.+?)\s*$`)
+	h3Pattern = regexp.MustCompile(`(?m)^(#{3})\s+(.+?)\s*$`)
+	h4Pattern = regexp.MustCompile(`(?m)^(#{4})\s+(.+?)\s*$`)
+	h5Pattern = regexp.MustCompile(`(?m)^(#{5})\s+(.+?)\s*$`)
 	// Bold text (e.g., **bold** or __bold__) - matches inline without lookaheads/behinds
 	boldPattern = regexp.MustCompile(`\*\*(.+?)\*\*|__(.+?)__`)
 	// Italic text (e.g., *italic* or _italic_) - matches inline without lookaheads/behinds
 	italicPattern = regexp.MustCompile(`(?:^|[^\w])(\*(\w+?)\*|_(\w+?)_)(?:[^\w]|$)`)
-	// Lists (e.g., - item or * item) - matches only at the beginning of a line
-	listPattern = regexp.MustCompile(`(?m)^\s*([*+-])\s+(.+)$`)
 	// Link (e.g., [text](url))
 	linkPattern = regexp.MustCompile(`\[(.*?)\]\((.*?)\)`)
 	// Image (e.g., ![alt text](url))
@@ -28,9 +32,9 @@ func (l *Lexer) push(v LexType) {
 	switch v {
 	case Break:
 		l.Output = append(l.Output, Lexeme{
-			Value:   BreakToken,
-			Row:     l.row,
-			Col:     l.col,
+			Value: BreakToken,
+			// Row:     l.row,
+			// Col:     l.col,
 			LexType: Break,
 			Zone:    l.zone,
 		})
@@ -44,9 +48,9 @@ func (l *Lexer) push(v LexType) {
 		l.Output = append(l.Output, Lexeme{
 			Lemma: lemma,
 			Value: word,
-			Row:   l.row,
+			// Row:   l.row,
 			// FIX: handles removed characters incorrectly in calculation (what start is probably supposed to used be for)
-			Col: l.col - 1 - len(word),
+			// Col: l.col - 1 - len(word),
 			// Col:     l.col - l.start,
 			LexType: Word,
 			Zone:    l.zone,
@@ -102,13 +106,21 @@ func (l *Lexer) ignore() {
 }
 
 func (l *Lexer) detectZone() {
-	peekBuffer, _ := l.br.Peek(128) // Adjust size as needed
+	peekBuffer, _ := l.br.Peek(32)
 
 	switch {
 	// FIX: handle remaining cases
 	// TODO: add capture group for code blocks (might just need a boolean flag for them)
-	case headingPattern.Match(peekBuffer):
+	case h1Pattern.Match(peekBuffer):
 		l.zone = H1
+	case h2Pattern.Match(peekBuffer):
+		l.zone = H2
+	case h3Pattern.Match(peekBuffer):
+		l.zone = H3
+	case h4Pattern.Match(peekBuffer):
+		l.zone = H4
+	case h5Pattern.Match(peekBuffer):
+		l.zone = H5
 	// case sectionPattern.Match(peekBuffer):
 	// 	l.zone = Default
 	// case boldPattern.Match(peekBuffer):
