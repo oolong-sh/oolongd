@@ -20,6 +20,10 @@ var cfg = config.OolongConfig{
 	IgnoreDirectories: []string{".templates", ".git"},
 }
 
+func init() {
+	state.InitState()
+}
+
 func TestReadNotesDirs(t *testing.T) {
 	s := state.State()
 	// TODO: actual tests with an example data directory
