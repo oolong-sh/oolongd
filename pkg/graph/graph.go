@@ -36,7 +36,7 @@ func clamp(value, min, max float64) float64 {
 
 const NOTE_NODE_VAL = 50
 
-func SerializeGraph(keywordMap map[string]keywords.Keyword, notes []notes.Note, lowerBound, upperBound float64) (string, error) {
+func SerializeGraph(keywordMap map[string]keywords.Keyword, notes []notes.Note, lowerBound, upperBound float64) ([]byte, error) {
 	nodes := []NodeJSON{}
 	links := []LinkJSON{}
 
@@ -78,8 +78,8 @@ func SerializeGraph(keywordMap map[string]keywords.Keyword, notes []notes.Note, 
 
 	jsonData, err := json.Marshal(graph)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return string(jsonData), nil
+	return jsonData, nil
 }

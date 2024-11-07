@@ -7,6 +7,7 @@ import (
 
 	"github.com/oolong-sh/oolong/internal/documents"
 	"github.com/oolong-sh/oolong/internal/linking/ngrams"
+	"github.com/oolong-sh/oolong/pkg/graph"
 	"github.com/oolong-sh/oolong/pkg/keywords"
 	"github.com/oolong-sh/oolong/pkg/notes"
 )
@@ -85,6 +86,17 @@ func UpdateState(docs []*documents.Document) error {
 	}
 	if err := keywords.SerializeNGrams(state.NGrams); err != nil {
 		panic(err)
+	}
+
+	kw := keywords.NGramsToKeywordsMap(state.NGrams)
+	n := notes.DocumentsToNotes(state.Documents)
+
+	dat, err := graph.SerializeGraph(kw, n, 0.1, 80)
+	if err != nil {
+		return err
+	}
+	if err := os.WriteFile("graph.json", dat, 0644); err != nil {
+		return err
 	}
 
 	return nil
