@@ -9,14 +9,14 @@ import (
 
 var notesFile = "./oolong-notes.json"
 
-type note struct {
+type Note struct {
 	Path    string             `json:"path"`
 	Weights map[string]float64 `json:"weights"`
 }
 
 // DOC:
 func SerializeDocuments(documents map[string]*documents.Document) error {
-	notes := documentsToNotes(documents)
+	notes := DocumentsToNotes(documents)
 
 	err := serializeNotes(notes)
 	if err != nil {
@@ -26,7 +26,7 @@ func SerializeDocuments(documents map[string]*documents.Document) error {
 	return nil
 }
 
-func serializeNotes(notes []note) error {
+func serializeNotes(notes []Note) error {
 	b, err := json.Marshal(notes)
 	if err != nil {
 		return err
@@ -41,9 +41,9 @@ func serializeNotes(notes []note) error {
 }
 
 // TODO: parameterize filtering threshold (maybe as a percentage?)
-func documentsToNotes(documents map[string]*documents.Document) []note {
-	notes := []note{}
-	threshold := 8.0
+func DocumentsToNotes(documents map[string]*documents.Document) []Note {
+	notes := []Note{}
+	threshold := 2.0
 
 	for k, v := range documents {
 		weights := map[string]float64{}
@@ -53,7 +53,7 @@ func documentsToNotes(documents map[string]*documents.Document) []note {
 			}
 		}
 
-		notes = append(notes, note{
+		notes = append(notes, Note{
 			Path:    k,
 			Weights: weights,
 		})

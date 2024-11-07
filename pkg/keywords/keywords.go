@@ -9,14 +9,14 @@ import (
 
 var keywordsFile = "./oolong-keywords.json"
 
-type keyword struct {
+type Keyword struct {
 	Keyword string  `json:"keyword"`
 	Weight  float64 `json:"weight"`
 }
 
 // DOC:
 func SerializeNGrams(ngmap map[string]*ngrams.NGram) error {
-	keywords := ngramsToKeywords(ngmap)
+	keywords := NGramsToKeywords(ngmap)
 
 	err := serializeKeywords(keywords)
 	if err != nil {
@@ -26,7 +26,7 @@ func SerializeNGrams(ngmap map[string]*ngrams.NGram) error {
 	return nil
 }
 
-func serializeKeywords(keywords []keyword) error {
+func serializeKeywords(keywords []Keyword) error {
 	b, err := json.Marshal(keywords)
 	if err != nil {
 		return err
@@ -41,16 +41,16 @@ func serializeKeywords(keywords []keyword) error {
 }
 
 // TODO: parameterize filtering threshold (maybe a percentage?)
-func ngramsToKeywords(ngmap map[string]*ngrams.NGram) []keyword {
+func NGramsToKeywords(ngmap map[string]*ngrams.NGram) []Keyword {
 	// keywords := make([]keyword, len(ngmap))
-	keywords := []keyword{}
+	keywords := []Keyword{}
 	threshold := 8.0
 
 	for k, v := range ngmap {
 		w := v.Weight()
 
 		if w > threshold {
-			keywords = append(keywords, keyword{
+			keywords = append(keywords, Keyword{
 				Keyword: k,
 				Weight:  w,
 			})

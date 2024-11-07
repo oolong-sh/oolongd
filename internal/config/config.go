@@ -16,15 +16,17 @@ type OolongConfig struct {
 	AllowedExtensions []string `toml:"allowed_extensions"`
 	PluginPaths       []string `toml:"plugin_paths"`
 	IgnoreDirectories []string `toml:"ignored_directories"`
+	StopWords         []string `toml:"stopwords"`
 }
 
-func Config() OolongConfig { return config }
+func Config() *OolongConfig { return &config }
 
 func NotesDirPaths() []string      { return config.NotesDirPaths }
 func NGramRange() []int            { return config.NGramRange }
 func AllowedExtensions() []string  { return config.AllowedExtensions }
 func PluginPaths() []string        { return config.PluginPaths }
 func IgnoredDirectories() []string { return config.IgnoreDirectories }
+func StopWords() []string          { return config.StopWords }
 
 // TODO: file watcher for config file, reload on change
 
