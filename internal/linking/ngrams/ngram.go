@@ -110,6 +110,10 @@ func Merge(maps ...map[string]*NGram) {
 				// ngram key found in map, merge counts and document info
 				// weights should be calculated elsewhere after all merges are completed
 				v0.globalCount += vi.globalCount
+				// lower zones are considered better, take best
+				if v0.zone > vi.zone {
+					v0.zone = vi.zone
+				}
 				for dk, dv := range vi.documents {
 					v0.documents[dk] = dv
 				}

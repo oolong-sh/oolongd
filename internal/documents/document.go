@@ -12,16 +12,12 @@ import (
 
 // Document type stores lexical tokens and NGrams for a single document
 type Document struct {
-	path   string
-	ngwgts map[string]float64
+	Path    string
+	Weights map[string]float64
+	NGrams  map[string]*ngrams.NGram
 
-	ngrams map[string]*ngrams.NGram
 	tokens []lexer.Lexeme
 }
-
-// Document implementation of Note interface
-func (d *Document) Path() string                       { return d.path }
-func (d *Document) KeywordWeights() map[string]float64 { return d.ngwgts }
 
 // Read in a single document file, lex, and generate NGrams
 // Wraps readDocument for explicit use with files
@@ -36,7 +32,7 @@ func readDocumentByFile(documentPath string) (*Document, error) {
 	if err != nil {
 		return nil, err
 	}
-	d.path = documentPath
+	d.Path = documentPath
 
 	return d, nil
 }
@@ -48,24 +44,16 @@ func readDocument(r io.Reader, documentPath string) (*Document, error) {
 	l.Lex(r)
 
 	doc := &Document{
-		path:   documentPath,
+		Path:   documentPath,
 		tokens: l.Output,
 	}
 
+	// extract ngrams from document
 	log.Printf("Generating NGrams for %s...\n", documentPath)
-	doc.ngrams = ngrams.Generate(doc.tokens, config.NGramRange(), doc.path)
+	doc.NGrams = ngrams.Generate(doc.tokens, config.NGramRange(), doc.Path)
 
-	// FIX: weight setting must occur after document NGRam maps are merged
-	doc.setWeightsMap()
+	// initialize weights map to avoid nil pointer issues
+	doc.Weights = make(map[string]float64, len(doc.NGrams))
 
 	return doc, nil
-}
-
-// Generate map of weights for all NGrams found in the document
-func (d *Document) setWeightsMap() {
-	wgts := make(map[string]float64)
-	for k, v := range d.ngrams {
-		wgts[k] = v.Documents()[d.path].DocumentWeight
-	}
-	d.ngwgts = wgts
 }
