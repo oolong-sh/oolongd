@@ -1,4 +1,4 @@
-# Oolong
+# Oolong Backend Daemon
 
 Coming soon...
 

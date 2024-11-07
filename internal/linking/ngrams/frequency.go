@@ -51,7 +51,6 @@ func tfidf(ngmap map[string]*NGram) {
 // Best Matching 25 -- Alternative matching function that doesn't downweight common terms as much
 // k1: controls saturation of TF (normally between 1.2 and 2)
 // b: controls document length normalization (0 is no normaliztion)
-// TODO: add bm25f modifications to account for zones -- add zone tracking to lexer (zones affect b, k1, idf)
 func bm25(ngmap map[string]*NGram) {
 	d := make(map[string]float64)
 	totalLength := 0.0

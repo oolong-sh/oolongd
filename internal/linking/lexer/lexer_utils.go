@@ -109,8 +109,8 @@ func (l *Lexer) detectZone() {
 	peekBuffer, _ := l.br.Peek(32)
 
 	switch {
-	// FIX: handle remaining cases
-	// TODO: add capture group for code blocks (might just need a boolean flag for them)
+	// TODO: handle remaining cases
+	// - add capture group for code blocks (might just need a boolean flag for them)
 	case h1Pattern.Match(peekBuffer):
 		l.zone = H1
 	case h2Pattern.Match(peekBuffer):

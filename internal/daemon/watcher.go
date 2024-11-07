@@ -68,6 +68,7 @@ func runNotesDirsWatcher(dirs ...string) error {
 
 				// re-read document
 				documents.ReadDocuments(event.Name)
+
 				// TODO: add dedup timer to prevent multi-write calls
 			}
 		case err, ok := <-watcher.Errors:

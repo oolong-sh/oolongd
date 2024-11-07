@@ -10,25 +10,34 @@ import (
 	"github.com/oolong-sh/oolong/internal/config"
 )
 
+// State updater function is dependency injected from state to avoid circular dependency
+var UpdateState func([]*Document) error
+
 // DOC: meant to be called with watcher
 // assumes paths should not be ignored (should be safe assumption due to watcher ignores)
 func ReadDocuments(paths ...string) error {
+	if UpdateState == nil {
+		panic("UpdateState was never instantiated.")
+	}
+
 	// read all input files, update state with documents
 	docs := readHandler(paths...)
 
 	// merge ngram maps and calculate weights
-	err := updateState(docs)
+	err := UpdateState(docs)
 	if err != nil {
 		return err
 	}
-
-	// TODO: all weights change, but may not need to be recalculated every time
 
 	return nil
 }
 
 // Read, lex, and extract NGrams for all documents in notes directories specified in config file
 func ReadNotesDirs() error {
+	if UpdateState == nil {
+		panic("UpdateState not instantiated.")
+	}
+
 	docs := []*Document{}
 	for _, dir := range config.NotesDirPaths() {
 		// extract all note file paths from notes directory
@@ -56,7 +65,7 @@ func ReadNotesDirs() error {
 	}
 
 	// merge maps and calculate weights
-	err := updateState(docs)
+	err := UpdateState(docs)
 	if err != nil {
 		return err
 	}
@@ -66,25 +75,35 @@ func ReadNotesDirs() error {
 
 // DOC:
 func readHandler(paths ...string) []*Document {
-	docs := make([]*Document, len(paths))
 	var wg sync.WaitGroup
+	docChan := make(chan *Document)
 
-	// perform a parallel read of found notes files
-	wg.Add(len(paths))
-	for i, p := range paths {
-		go func(i int, notePath string) {
+	// launch a goroutine for each file path and read in parallel
+	for _, p := range paths {
+		wg.Add(1)
+		go func(notePath string) {
+			defer wg.Done()
 			doc, err := readDocumentByFile(notePath)
 			if err != nil {
 				log.Printf("Failed to read file: '%s' %v", notePath, err)
 				return
 			}
-			// TODO: this could be changed to use channels
-			docs[i] = doc
-			wg.Done()
-		}(i, p)
+			// send the document via channel
+			docChan <- doc
+		}(p)
 	}
-	wg.Wait()
 
-	// append results to output array
+	// close the channel once all goroutines are done
+	go func() {
+		wg.Wait()
+		close(docChan)
+	}()
+
+	// collect documents from the channel
+	var docs []*Document
+	for doc := range docChan {
+		docs = append(docs, doc)
+	}
+
 	return docs
 }

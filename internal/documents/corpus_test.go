@@ -1,4 +1,4 @@
-package documents
+package documents_test
 
 import (
 	"fmt"
@@ -6,8 +6,9 @@ import (
 	"testing"
 
 	"github.com/oolong-sh/oolong/internal/config"
-	"github.com/oolong-sh/oolong/internal/linking/lexer"
+	"github.com/oolong-sh/oolong/internal/documents"
 	"github.com/oolong-sh/oolong/internal/linking/ngrams"
+	"github.com/oolong-sh/oolong/internal/state"
 )
 
 var cfg = config.OolongConfig{
@@ -20,28 +21,29 @@ var cfg = config.OolongConfig{
 }
 
 func TestReadNotesDirs(t *testing.T) {
+	s := state.State()
 	// TODO: actual tests with an example data directory
-	if err := ReadNotesDirs(); err != nil {
+	if err := documents.ReadNotesDirs(); err != nil {
 		t.Fatalf("Failed to read notes directories: %v\n", err)
 	}
 
 	// write out tokens
-	b := []byte{}
-	for _, d := range state.Documents {
-		for _, t := range d.tokens {
-			if t.Value == lexer.BreakToken {
-				continue
-			}
-			b = append(b, []byte(fmt.Sprintf("%s, %s, %d\n", t.Lemma, t.Value, t.Zone))...)
-		}
-	}
-	if err := os.WriteFile("./tokens.txt", b, 0666); err != nil {
-		t.Fatalf("Failed to write tokens: %v\n", err)
-	}
+	// b := []byte{}
+	// for _, d := range s.Documents {
+	// 	for _, t := range d.tokens {
+	// 		if t.Value == lexer.BreakToken {
+	// 			continue
+	// 		}
+	// 		b = append(b, []byte(fmt.Sprintf("%s, %s, %d\n", t.Lemma, t.Value, t.Zone))...)
+	// 	}
+	// }
+	// if err := os.WriteFile("./tokens.txt", b, 0666); err != nil {
+	// 	t.Fatalf("Failed to write tokens: %v\n", err)
+	// }
 
-	b = append([]byte{}, []byte("ngram,weight,count\n")...)
-	for _, d := range state.Documents {
-		for _, ng := range d.ngrams {
+	b := append([]byte{}, []byte("ngram,weight,count\n")...)
+	for _, d := range s.Documents {
+		for _, ng := range d.NGrams {
 			b = append(b, []byte(fmt.Sprintf("%s, %f, %d\n", ng.Keyword(), ng.Weight(), ng.Count()))...)
 		}
 	}
@@ -50,9 +52,9 @@ func TestReadNotesDirs(t *testing.T) {
 	}
 
 	b = append([]byte{}, []byte("ngram,weight,count,ndocs\n")...)
-	mng := ngrams.FilterMeaningfulNGrams(state.NGrams, 2, int(float64(len(state.Documents))/1.5), 4.0)
-	for _, s := range mng {
-		b = append(b, []byte(fmt.Sprintf("%s,%f,%d,%d\n", s, state.NGrams[s].Weight(), state.NGrams[s].Count(), len(state.NGrams[s].Documents())))...)
+	mng := ngrams.FilterMeaningfulNGrams(s.NGrams, 2, int(float64(len(s.Documents))/1.5), 4.0)
+	for _, k := range mng {
+		b = append(b, []byte(fmt.Sprintf("%s,%f,%d,%d\n", k, s.NGrams[k].Weight(), s.NGrams[k].Count(), len(s.NGrams[k].Documents())))...)
 	}
 	if err := os.WriteFile("./meaningful-ngrams.csv", b, 0666); err != nil {
 		t.Fatalf("Failed to write out meaningful ngrams: %v\n", err)
