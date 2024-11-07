@@ -9,9 +9,9 @@ import (
 )
 
 type NodeJSON struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-	Val  int    `json:"val"`
+	ID   string  `json:"id"`
+	Name string  `json:"name"`
+	Val  float64 `json:"val"`
 }
 
 type LinkJSON struct {
@@ -45,7 +45,7 @@ func SerializeGraph(keywordMap map[string]keywords.Keyword, notes []notes.Note, 
 		nodes = append(nodes, NodeJSON{
 			ID:   keyword.Keyword,
 			Name: keyword.Keyword,
-			Val:  int(clampedWeight),
+			Val:  clampedWeight,
 		})
 	}
 
