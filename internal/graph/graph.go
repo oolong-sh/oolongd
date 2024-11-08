@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"path/filepath"
 
-	"github.com/oolong-sh/oolong/pkg/keywords"
-	"github.com/oolong-sh/oolong/pkg/notes"
+	"github.com/oolong-sh/oolong/internal/keywords"
+	"github.com/oolong-sh/oolong/internal/notes"
 )
 
 type NodeJSON struct {
@@ -52,7 +52,7 @@ func SerializeGraph(keywordMap map[string]keywords.Keyword, notes []notes.Note, 
 	for _, note := range notes {
 		// Add Note node
 		noteID := note.Path
-		noteName := filepath.Base(note.Path) // /home/patrick/notes/home/blogs/bayes.md -> bayes.md
+		noteName := filepath.Base(note.Path)
 		nodes = append(nodes, NodeJSON{
 			ID:   noteID,
 			Name: noteName,

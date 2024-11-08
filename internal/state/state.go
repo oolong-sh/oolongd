@@ -6,10 +6,10 @@ import (
 	"os"
 
 	"github.com/oolong-sh/oolong/internal/documents"
+	"github.com/oolong-sh/oolong/internal/graph"
+	"github.com/oolong-sh/oolong/internal/keywords"
 	"github.com/oolong-sh/oolong/internal/linking/ngrams"
-	"github.com/oolong-sh/oolong/pkg/graph"
-	"github.com/oolong-sh/oolong/pkg/keywords"
-	"github.com/oolong-sh/oolong/pkg/notes"
+	"github.com/oolong-sh/oolong/internal/notes"
 )
 
 // application-wide persistent state of documents and ngrams
@@ -36,6 +36,7 @@ func InitState() {
 }
 
 // Update application state information after file reads are performed
+// FIX: this needs to lock state while running to ensure endpoints will work correctly
 func UpdateState(docs []*documents.Document) error {
 	log.Println("Updating state and recalculating weights...")
 

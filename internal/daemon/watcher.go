@@ -60,6 +60,8 @@ func runNotesDirsWatcher(dirs ...string) error {
 			}
 			// log.Println("Event:", event)
 
+			// TODO: add new watcher in cases where new directories are created
+
 			if event.Has(fsnotify.Write) {
 				log.Println("Modified file:", event.Name)
 
