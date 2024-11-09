@@ -41,16 +41,19 @@ func SerializeGraph(keywordMap map[string]keywords.Keyword, notes []notes.Note, 
 	links := []LinkJSON{}
 
 	for _, keyword := range keywordMap {
-		clampedWeight := clamp(keyword.Weight, lowerBound, upperBound)
-		nodes = append(nodes, NodeJSON{
-			ID:   keyword.Keyword,
-			Name: keyword.Keyword,
-			Val:  clampedWeight,
-		})
+		// Only add nodes above the minimum threshold
+		if keyword.Weight >= lowerBound {
+			clampedWeight := clamp(keyword.Weight, lowerBound, upperBound)
+			nodes = append(nodes, NodeJSON{
+				ID:   keyword.Keyword,
+				Name: keyword.Keyword,
+				Val:  clampedWeight,
+			})
+		}
 	}
 
 	for _, note := range notes {
-		// Add Note node
+		// Add Note node with a fixed value
 		noteID := note.Path
 		noteName := filepath.Base(note.Path)
 		nodes = append(nodes, NodeJSON{
@@ -62,7 +65,7 @@ func SerializeGraph(keywordMap map[string]keywords.Keyword, notes []notes.Note, 
 		// Link notes to keywords
 		for keywordID := range note.Weights {
 			keyword, exists := keywordMap[keywordID]
-			if exists {
+			if exists && keyword.Weight >= lowerBound {
 				links = append(links, LinkJSON{
 					Source: noteID,
 					Target: keyword.Keyword,
