@@ -1,7 +1,7 @@
 package plugins
 
 import (
-	"fmt"
+	"log"
 	"time"
 
 	"github.com/oolong-sh/oolong/internal/config"
@@ -10,18 +10,18 @@ import (
 func InitPlugins() {
 	pm, err := NewPluginManager()
 	if err != nil {
-		fmt.Println("Error initializing plugin manager:", err)
+		log.Println("Error initializing plugin manager:", err)
 		return
 	}
 	defer pm.LuaState.Close()
 
 	if err := pm.LoadPlugins(config.PluginPaths()); err != nil {
-		fmt.Println("Error loading plugins:", err)
+		log.Println("Error loading plugins:", err)
 		return
 	}
 
 	if err := pm.TriggerEvent("dailyNoteEvent"); err != nil {
-		fmt.Println("Error triggering daily note event:", err)
+		log.Println("Error triggering daily note event:", err)
 		return
 	}
 
@@ -29,7 +29,7 @@ func InitPlugins() {
 	go pm.StartEventLoop()
 
 	if err := pm.TriggerEvent("customEvent", "example data"); err != nil {
-		fmt.Println("Error triggering event:", err)
+		log.Println("Error triggering event:", err)
 	}
 
 	time.Sleep(2 * time.Second)

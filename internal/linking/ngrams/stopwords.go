@@ -1,8 +1,6 @@
 package ngrams
 
 import (
-	"fmt"
-
 	"github.com/oolong-sh/oolong/internal/config"
 )
 
@@ -13,7 +11,6 @@ var stopWords = []string{
 // DOC:
 func MergeStopWords() {
 	if config.StopWords() != nil {
-		fmt.Println(config.StopWords())
 		stopWords = append(stopWords, config.StopWords()...)
 	}
 }
