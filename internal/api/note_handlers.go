@@ -22,7 +22,7 @@ func handleGetNotes(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(data)
 }
 
-// DOC:
+// 'GET /note/{path}' endpoint handler gets note contents corresponding to input path
 func handleGetNote(w http.ResponseWriter, r *http.Request) {
 	log.Println("Request received:", r.Method, r.URL, r.Host)
 
@@ -48,7 +48,7 @@ func handleGetNote(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// DOC:
+// 'POST /note/{path}' endpoint handler creates note contents corresponding to input path
 func handleCreateNote(w http.ResponseWriter, r *http.Request) {
 	log.Println("Request received:", r.Method, r.URL, r.Host)
 
@@ -89,7 +89,30 @@ func handleUpdateNote(w http.ResponseWriter, r *http.Request) {
 
 // DOC:
 func handleDeleteNote(w http.ResponseWriter, r *http.Request) {
-	// TODO: allow writing notes
+	log.Println("Request received:", r.Method, r.URL, r.Host)
+
+	path := r.URL.Query().Get("path")
+	if path == "" {
+		http.Error(w, "Path parameter not specified ", http.StatusBadRequest)
+		return
+	}
+
+	// check if path before file exists, then check if file exists
+	if e, err := exists(path); err != nil {
+		log.Println(err)
+		http.Error(w, "Error checking path", 500)
+		return
+	} else if !e {
+		log.Printf("File %s does not exists.\n", path)
+		http.Error(w, "File does not exist", 500)
+		return
+	}
+
+	if err := os.Remove(path); err != nil {
+		log.Println("Failed to delete file", err)
+		http.Error(w, "Failed to remove file", 500)
+		return
+	}
 
 	// NOTE: this function may need to call the update function due to files no longer existing
 	// - check this case in state, this may require substantial logic missing there
