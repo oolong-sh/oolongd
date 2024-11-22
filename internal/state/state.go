@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sync"
 
 	"github.com/oolong-sh/oolong/internal/documents"
 	"github.com/oolong-sh/oolong/internal/graph"
@@ -13,7 +14,14 @@ import (
 )
 
 // application-wide persistent state of documents and ngrams
-var state OolongState
+// var state OolongState
+
+var mgr StateManager
+
+type StateManager struct {
+	state OolongState
+	m     sync.RWMutex
+}
 
 type OolongState struct {
 	Documents map[string]*documents.Document
@@ -21,14 +29,20 @@ type OolongState struct {
 }
 
 // State getter
-func State() OolongState { return state }
+func State() OolongState {
+	mgr.m.RLock()
+	defer mgr.m.RUnlock()
+	return mgr.state
+}
 
 // Initialize oolong state variables and inject state updater function into documents
 func InitState() {
 	// instantiate persistent state
-	state = OolongState{
-		Documents: map[string]*documents.Document{},
-		NGrams:    map[string]*ngrams.NGram{},
+	mgr = StateManager{
+		state: OolongState{
+			Documents: map[string]*documents.Document{},
+			NGrams:    map[string]*ngrams.NGram{},
+		},
 	}
 
 	// dependency injection of state updater function
@@ -37,28 +51,31 @@ func InitState() {
 
 // Update application state information after file reads are performed
 // FIX: this needs to lock state while running to ensure endpoints will work correctly
+// - or use channels and statemanager type
 func UpdateState(docs []*documents.Document) error {
+	mgr.m.Lock()
+	defer mgr.m.Unlock()
 	log.Println("Updating state and recalculating weights...")
 
 	// update state documents
 	for _, doc := range docs {
-		state.Documents[doc.Path] = doc
+		mgr.state.Documents[doc.Path] = doc
 	}
 
 	// merge resulting ngram maps
-	for _, d := range state.Documents {
-		ngrams.Merge(state.NGrams, d.NGrams)
+	for _, d := range mgr.state.Documents {
+		ngrams.Merge(mgr.state.NGrams, d.NGrams)
 	}
 
 	// calculate weights
-	ngrams.CalcWeights(state.NGrams, len(state.Documents))
+	ngrams.CalcWeights(mgr.state.NGrams, len(mgr.state.Documents))
 	log.Println("Done calculating weights.")
 
 	// update document weights after all weights are calculated
 	log.Println("Updating document weights...")
-	for ng, ngram := range state.NGrams {
+	for ng, ngram := range mgr.state.NGrams {
 		for path, nginfo := range ngram.Documents() {
-			state.Documents[path].Weights[ng] = nginfo.DocumentWeight
+			mgr.state.Documents[path].Weights[ng] = nginfo.DocumentWeight
 		}
 	}
 	log.Println("Done updating document weights.")

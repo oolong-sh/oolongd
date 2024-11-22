@@ -1,6 +1,7 @@
 package documents
 
 import (
+	"errors"
 	"io/fs"
 	"log"
 	"path/filepath"
@@ -10,7 +11,7 @@ import (
 	"github.com/oolong-sh/oolong/internal/config"
 )
 
-// State updater function is dependency injected from state to avoid circular dependency
+// State updater function depends on injected function from state to avoid circular dependency
 var UpdateState func([]*Document) error
 
 // DOC: meant to be called with watcher
@@ -62,6 +63,10 @@ func ReadNotesDirs() error {
 
 		// read all documents and append results
 		docs = append(docs, readHandler(paths...)...)
+	}
+
+	if len(docs) == 0 {
+		return errors.New("No documents found in NotesDirPaths.")
 	}
 
 	// merge maps and calculate weights
