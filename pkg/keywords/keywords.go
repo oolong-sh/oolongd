@@ -59,3 +59,21 @@ func NGramsToKeywords(ngmap map[string]*ngrams.NGram) []Keyword {
 
 	return keywords
 }
+
+func NGramsToKeywordsMap(ngmap map[string]*ngrams.NGram) map[string]Keyword {
+	keywords := map[string]Keyword{}
+	threshold := 8.0
+
+	for k, v := range ngmap {
+		w := v.Weight()
+
+		if w > threshold {
+			keywords[k] = Keyword{
+				Keyword: k,
+				Weight:  w,
+			}
+		}
+	}
+
+	return keywords
+}
