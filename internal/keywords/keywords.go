@@ -2,12 +2,9 @@ package keywords
 
 import (
 	"encoding/json"
-	"os"
 
 	"github.com/oolong-sh/oolong/internal/linking/ngrams"
 )
-
-var keywordsFile = "./oolong-keywords.json"
 
 type Keyword struct {
 	Keyword string  `json:"keyword"`
@@ -15,29 +12,15 @@ type Keyword struct {
 }
 
 // DOC:
-func SerializeNGrams(ngmap map[string]*ngrams.NGram) error {
+func SerializeNGrams(ngmap map[string]*ngrams.NGram) ([]byte, error) {
 	keywords := NGramsToKeywords(ngmap)
 
-	err := serializeKeywords(keywords)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func serializeKeywords(keywords []Keyword) error {
 	b, err := json.Marshal(keywords)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	err = os.WriteFile(keywordsFile, b, 0644)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return b, nil
 }
 
 // TODO: parameterize filtering threshold (maybe a percentage?)

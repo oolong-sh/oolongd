@@ -13,8 +13,9 @@ import (
 func handleGetNotes(w http.ResponseWriter, r *http.Request) {
 	log.Println("Request received:", r.Method, r.URL, r.Host)
 
-	data := make([]string, len(state.State().Documents))
-	for k := range state.State().Documents {
+	s := state.State()
+	data := make([]string, len(s.Documents))
+	for k := range s.Documents {
 		data = append(data, k)
 	}
 
@@ -23,6 +24,7 @@ func handleGetNotes(w http.ResponseWriter, r *http.Request) {
 }
 
 // 'GET /note/{path}' endpoint handler gets note contents corresponding to input path
+// TODO: maybe change path to a request body/form item since it can have slashes
 func handleGetNote(w http.ResponseWriter, r *http.Request) {
 	log.Println("Request received:", r.Method, r.URL, r.Host)
 

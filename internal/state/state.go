@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"sync"
 
 	"github.com/oolong-sh/oolong/internal/documents"
 	"github.com/oolong-sh/oolong/internal/graph"
@@ -13,69 +12,85 @@ import (
 	"github.com/oolong-sh/oolong/internal/notes"
 )
 
-// application-wide persistent state of documents and ngrams
-// var state OolongState
-
-var mgr StateManager
-
-type StateManager struct {
-	state OolongState
-	m     sync.RWMutex
-}
-
 type OolongState struct {
 	Documents map[string]*documents.Document
 	NGrams    map[string]*ngrams.NGram
 }
 
-// State getter
-func State() OolongState {
-	mgr.m.RLock()
-	defer mgr.m.RUnlock()
-	return mgr.state
+type StateManager struct {
+	state   OolongState
+	updates chan []*documents.Document
+	reads   chan chan OolongState
 }
 
-// Initialize oolong state variables and inject state updater function into documents
+var s StateManager
+
 func InitState() {
-	// instantiate persistent state
-	mgr = StateManager{
+	s = StateManager{
 		state: OolongState{
 			Documents: map[string]*documents.Document{},
 			NGrams:    map[string]*ngrams.NGram{},
 		},
+		updates: make(chan []*documents.Document),
+		reads:   make(chan chan OolongState),
 	}
 
-	// dependency injection of state updater function
+	go s.run()
+
 	documents.UpdateState = UpdateState
 }
 
-// Update application state information after file reads are performed
-// FIX: this needs to lock state while running to ensure endpoints will work correctly
-// - or use channels and statemanager type
+func State() OolongState {
+	respChan := make(chan OolongState)
+	s.reads <- respChan
+	log.Println("State fetched.")
+	return <-respChan
+}
+
+func (s *StateManager) run() {
+	for {
+		select {
+		case docs := <-s.updates:
+			s.updateState(docs)
+		case resp := <-s.reads:
+			resp <- s.state
+		}
+	}
+}
+
 func UpdateState(docs []*documents.Document) error {
-	mgr.m.Lock()
-	defer mgr.m.Unlock()
+	select {
+	case s.updates <- docs:
+		log.Println("Update request sent")
+		return nil
+	default:
+		log.Println("State update channel is full")
+		return fmt.Errorf("state update channel is full")
+	}
+}
+
+func (s *StateManager) updateState(docs []*documents.Document) {
 	log.Println("Updating state and recalculating weights...")
 
-	// update state documents
+	// Update state documents
 	for _, doc := range docs {
-		mgr.state.Documents[doc.Path] = doc
+		s.state.Documents[doc.Path] = doc
 	}
 
-	// merge resulting ngram maps
-	for _, d := range mgr.state.Documents {
-		ngrams.Merge(mgr.state.NGrams, d.NGrams)
+	// Merge resulting n-gram maps
+	for _, d := range s.state.Documents {
+		ngrams.Merge(s.state.NGrams, d.NGrams)
 	}
 
-	// calculate weights
-	ngrams.CalcWeights(mgr.state.NGrams, len(mgr.state.Documents))
+	// Calculate weights
+	ngrams.CalcWeights(s.state.NGrams, len(s.state.Documents))
 	log.Println("Done calculating weights.")
 
-	// update document weights after all weights are calculated
+	// Update document weights after all weights are calculated
 	log.Println("Updating document weights...")
-	for ng, ngram := range mgr.state.NGrams {
+	for ng, ngram := range s.state.NGrams {
 		for path, nginfo := range ngram.Documents() {
-			mgr.state.Documents[path].Weights[ng] = nginfo.DocumentWeight
+			s.state.Documents[path].Weights[ng] = nginfo.DocumentWeight
 		}
 	}
 	log.Println("Done updating document weights.")
@@ -83,39 +98,33 @@ func UpdateState(docs []*documents.Document) error {
 	//
 	// TEST: remove later
 	//
-	state := State()
-	b := append([]byte{}, []byte("ngram,weight,count,ndocs\n")...)
-	mng := ngrams.FilterMeaningfulNGrams(state.NGrams, 2, int(float64(len(state.Documents))/1.5), 4.0)
-	for _, s := range mng {
-		b = append(b, []byte(fmt.Sprintf("%s,%f,%d,%d\n", s, state.NGrams[s].Weight(), state.NGrams[s].Count(), len(state.NGrams[s].Documents())))...)
-	}
-	if err := os.WriteFile("./meaningful-ngrams.csv", b, 0666); err != nil {
-		panic(err)
-	}
+	// Generate meaningful n-grams and write to a CSV (for testing/debugging)
+	// state := s.state // Snapshot of the current state
+	// b := append([]byte{}, []byte("ngram,weight,count,ndocs\n")...)
+	// mng := ngrams.FilterMeaningfulNGrams(state.NGrams, 2, int(float64(len(state.Documents))/1.5), 4.0)
+	// for _, s := range mng {
+	// 	b = append(b, []byte(fmt.Sprintf("%s,%f,%d,%d\n", s, state.NGrams[s].Weight(), state.NGrams[s].Count(), len(state.NGrams[s].Documents())))...)
+	// }
+	// if err := os.WriteFile("./meaningful-ngrams.csv", b, 0666); err != nil {
+	// 	panic(err)
+	// }
 	//
 	// TEST: remove later
 	//
 
-	// TODO: other things? (file writes?)
+	// TODO: add threshold filtering params to these functions (use config)
+	kw := keywords.NGramsToKeywordsMap(s.state.NGrams)
+	notes := notes.DocumentsToNotes(s.state.Documents)
 
-	// serialize results for graph usage
-	if err := notes.SerializeDocuments(state.Documents); err != nil {
-		panic(err)
-	}
-	if err := keywords.SerializeNGrams(state.NGrams); err != nil {
-		panic(err)
-	}
-
-	kw := keywords.NGramsToKeywordsMap(state.NGrams)
-	n := notes.DocumentsToNotes(state.Documents)
-
-	dat, err := graph.SerializeGraph(kw, n, 0.1, 80)
+	dat, err := graph.SerializeGraph(kw, notes, 0.1, 80)
 	if err != nil {
-		return err
-	}
-	if err := os.WriteFile("graph.json", dat, 0644); err != nil {
-		return err
+		panic(err)
 	}
 
-	return nil
+	// TEST: remove json output later
+	if err := os.WriteFile("graph.json", dat, 0644); err != nil {
+		panic(err)
+	}
+
+	log.Println("State update complete.")
 }
