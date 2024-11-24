@@ -104,26 +104,20 @@ func (s *StateManager) updateState(docs []*documents.Document) {
 	// if err := os.WriteFile("./meaningful-ngrams.csv", b, 0666); err != nil {
 	// 	panic(err)
 	// }
-	//
-	// TEST: remove later
-	//
-
-	// TODO: add threshold filtering params to these functions (use config)
+	// //  TODO: add threshold filtering params to these functions (use config)
 	// kw := keywords.NGramsToKeywordsMap(s.state.NGrams)
 	// notes := notes.DocumentsToNotes(s.state.Documents)
-
-	// REFACTOR: store graph json in state field to make it available on request earlier?
-	// - this is probably a good idea
-	//
 	// dat, err := graph.SerializeGraph(kw, notes, 0.1, 80)
 	// if err != nil {
 	// 	panic(err)
 	// }
-
-	// TEST: remove json output later
+	//
 	// if err := os.WriteFile("graph.json", dat, 0644); err != nil {
 	// 	panic(err)
 	// }
+	//
+	// TEST: remove later
+	//
 
 	log.Println("State update complete.")
 }

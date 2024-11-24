@@ -29,7 +29,6 @@ type OolongGraphConfig struct {
 	MinNodeWeight float64 `toml:"min_node_weight"`
 	MaxNodeWeight float64 `toml:"max_node_weight"`
 	MinLinkWeight float64 `toml:"min_link_weight"`
-	// TODO: max link weight (call it a cap?)
 }
 
 func Config() *OolongConfig { return &cfg }
@@ -68,6 +67,8 @@ func Setup(configPath string) error {
 		}
 		cfg.NotesDirPaths[i] = d
 	}
+
+	// TODO: set default values for thresholds if not set
 
 	return nil
 }

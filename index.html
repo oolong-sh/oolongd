@@ -10,50 +10,6 @@
 
 <body>
   <div id="3d-graph"></div>
-
   <script type="importmap">{ "imports": { "three": "//unpkg.com/three/build/three.module.js" }}</script>
-  <script type="module">
-    import SpriteText from "//unpkg.com/three-spritetext/dist/three-spritetext.mjs";
-
-    const normalizeValue = (val, min, max) => (val - min) / (max - min);
-
-    const minWeight = 0.00
-
-    // CHANGE: move handling of color to backend where calculations are faster
-    function mapValueToColor(value) {
-      const clampedValue = Math.max(minWeight, Math.min(value, 1));
-      // interpolate color between dark gray (#333333 -- 51) and white (#ffffff 255)
-      // const grayScale = Math.round(51 + (204 * clampedValue));
-      const grayScale = Math.round(1 + (204 * clampedValue)) * 1.5;
-      return `rgb(${grayScale}, ${grayScale}, ${grayScale})`;
-    }
-
-    fetch("http://localhost:11975/graph").then(res => res.json())
-      // fetch("./graph.json").then(res => res.json())
-      .then(data => {
-        const Graph = ForceGraph3D()
-          (document.getElementById('3d-graph'))
-          // .jsonUrl('./graph.json')
-          .graphData(data)
-          .nodeAutoColorBy('group')
-          .nodeThreeObject(node => {
-            const splitname = node.id.split("/") // CHANGE: add new field on daemon side for split name
-            const sprite = new SpriteText(splitname[splitname.length - 1]);
-            sprite.material.depthWrite = false;
-            sprite.color = node.color;
-            sprite.textHeight = 8;
-            return sprite;
-          })
-          .linkOpacity(.8) // NOTE: baseline opacity can be adjusted, but keep high
-          .linkColor(link => {
-            const value = link.strength !== undefined ? link.strength : minWeight;
-            return mapValueToColor(value);
-          });
-
-        // Spread nodes a little wider
-        Graph.d3Force('charge').strength(-120);
-      })
-
-    // TODO: line weight can be set here, use documentWeight to do this
-  </script>
+  <script type="module" src="index.js"> </script>
 </body>

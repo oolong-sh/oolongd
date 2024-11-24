@@ -36,4 +36,4 @@ plugin_paths = [
 [graph]
 min_node_weight = 8.0
 max_node_weight = 80.0
-min_link_weight = 2.0
+min_link_weight = 0.1
