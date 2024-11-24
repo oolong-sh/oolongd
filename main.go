@@ -2,11 +2,11 @@ package main
 
 import (
 	"flag"
-	"fmt"
 
 	"github.com/oolong-sh/oolong/internal/config"
 	"github.com/oolong-sh/oolong/internal/daemon"
 	"github.com/oolong-sh/oolong/internal/documents"
+	"github.com/oolong-sh/oolong/internal/linking/ngrams"
 	"github.com/oolong-sh/oolong/internal/state"
 )
 
@@ -14,23 +14,22 @@ var daemonFlag = flag.Bool("no-daemon", false, "Run Oolong in no-daemon mode (no
 
 func main() {
 	// read in config
-	cfg, err := config.Setup("~/.config/oolong.toml")
-	if err != nil {
-		fmt.Println(err)
-		return
+	if err := config.Setup("~/.config/oolong.toml"); err != nil {
+		panic(err)
 	}
-	fmt.Println(cfg.PluginPaths)
+
+	// merge stop words from config
+	ngrams.MergeStopWords()
 
 	// initialize state
 	state.InitState()
 
 	// read notes directories
-	err = documents.ReadNotesDirs()
-	if err != nil {
+	if err := documents.ReadNotesDirs(); err != nil {
 		panic(err)
 	}
 
-	// go plugins.InitPlugins(&cfg)
+	// go plugins.InitPlugins()
 
 	// run daemon if --no-daemon flag is not passed
 	flag.Parse()

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"io/fs"
 	"log"
+	"os"
 	"path/filepath"
 	"slices"
 	"time"
@@ -50,7 +51,6 @@ func runNotesDirsWatcher(dirs ...string) error {
 	}
 
 	// watcher handler
-	// go func() { // running entire function as a goroutine, handler doesn't need to be one
 	for {
 		select {
 		case event, ok := <-watcher.Events:
@@ -58,9 +58,9 @@ func runNotesDirsWatcher(dirs ...string) error {
 				log.Println("Watcher event channel returned bad result.")
 				return errors.New("Invalid watcher errors channel value.")
 			}
-			// log.Println("Event:", event)
 
-			if event.Has(fsnotify.Write) {
+			switch {
+			case event.Has(fsnotify.Write):
 				log.Println("Modified file:", event.Name)
 
 				// write event is sent on write start, wait 500ms for write to finish
@@ -70,6 +70,22 @@ func runNotesDirsWatcher(dirs ...string) error {
 				documents.ReadDocuments(event.Name)
 
 				// TODO: add dedup timer to prevent multi-write calls
+
+			case event.Has(fsnotify.Remove):
+				log.Println("Removed file/directory", event.Name)
+				// TODO: remove from state
+				// - need to be careful with remove event as editors use it when writing files
+				// - state removal needs to also remove ngrams
+				// - should only trigger update on file deletions
+
+			case event.Has(fsnotify.Create):
+				log.Println("Created file/directory", event.Name)
+
+				if info, err := os.Stat(event.Name); err == nil {
+					if info.IsDir() {
+						watcher.Add(event.Name)
+					}
+				}
 			}
 		case err, ok := <-watcher.Errors:
 			if !ok {
@@ -78,7 +94,4 @@ func runNotesDirsWatcher(dirs ...string) error {
 			log.Println("error:", err)
 		}
 	}
-	// }()
-	// <-make(chan struct{})
-	// return nil
 }

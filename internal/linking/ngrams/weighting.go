@@ -46,12 +46,7 @@ var zoneB map[lexer.Zone]float64 = map[lexer.Zone]float64{
 func CalcWeights(ngmap map[string]*NGram, N int) {
 	idf(ngmap, N)
 	// tfidf(ngmap)
-	// TODO: decide on k and b values (and allow them to be tweaked from config)
 	bm25(ngmap)
-	// CHANGE: probably take n and word length into account
-
-	// TODO: move adjustments to weights calculation function
-	// NOTE: these adjustments are much larger than the bm25 score and probably need to be scaled down
 
 	for _, ng := range ngmap {
 		ng.updateWeight()
@@ -94,4 +89,12 @@ func FilterMeaningfulNGrams(ngmap map[string]*NGram, minDF int, maxDF int, minAv
 		}
 	}
 	return out
+}
+
+type Doc interface {
+	// get
+}
+
+// TODO:
+func NormalizeDocumentWeights() {
 }

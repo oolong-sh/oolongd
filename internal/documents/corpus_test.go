@@ -15,7 +15,7 @@ var cfg = config.OolongConfig{
 	// NotesDirPaths:     []string{"~/notes"},
 	NotesDirPaths:     []string{"../../examples/data"},
 	NGramRange:        []int{1, 2, 3},
-	AllowedExtensions: []string{".md", ".tex", ".typ"},
+	AllowedExtensions: []string{".md", ".tex", ".typ", ".txt"},
 	PluginPaths:       []string{},
 	IgnoreDirectories: []string{".templates", ".git"},
 }
@@ -25,25 +25,20 @@ func init() {
 }
 
 func TestReadNotesDirs(t *testing.T) {
-	s := state.State()
+	conf := config.Config()
+	conf.NotesDirPaths = cfg.NotesDirPaths
+	conf.NGramRange = cfg.NGramRange
+	conf.AllowedExtensions = cfg.AllowedExtensions
+	conf.PluginPaths = cfg.PluginPaths
+	conf.IgnoreDirectories = cfg.IgnoreDirectories
+
 	// TODO: actual tests with an example data directory
+	fmt.Println("reading?? -- gets lock")
 	if err := documents.ReadNotesDirs(); err != nil {
 		t.Fatalf("Failed to read notes directories: %v\n", err)
 	}
-
-	// write out tokens
-	// b := []byte{}
-	// for _, d := range s.Documents {
-	// 	for _, t := range d.tokens {
-	// 		if t.Value == lexer.BreakToken {
-	// 			continue
-	// 		}
-	// 		b = append(b, []byte(fmt.Sprintf("%s, %s, %d\n", t.Lemma, t.Value, t.Zone))...)
-	// 	}
-	// }
-	// if err := os.WriteFile("./tokens.txt", b, 0666); err != nil {
-	// 	t.Fatalf("Failed to write tokens: %v\n", err)
-	// }
+	fmt.Println("finished reading -- getting read lock")
+	s := state.State()
 
 	b := append([]byte{}, []byte("ngram,weight,count\n")...)
 	for _, d := range s.Documents {

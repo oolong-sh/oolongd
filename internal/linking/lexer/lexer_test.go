@@ -14,9 +14,7 @@ import (
 var cfg config.OolongConfig
 
 func init() {
-	var err error
-	cfg, err = config.Setup("../../../examples/oolong.toml")
-	if err != nil {
+	if err := config.Setup("../../../examples/oolong.toml"); err != nil {
 		panic(err)
 	}
 }
