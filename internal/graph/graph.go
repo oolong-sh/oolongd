@@ -15,8 +15,9 @@ type NodeJSON struct {
 }
 
 type LinkJSON struct {
-	Source string `json:"source"`
-	Target string `json:"target"`
+	Source string  `json:"source"`
+	Target string  `json:"target"`
+	Value  float64 `json:"strength"`
 }
 
 type Graph struct {
@@ -34,9 +35,10 @@ func clamp(value, min, max float64) float64 {
 	return value
 }
 
-const NOTE_NODE_VAL = 10
+const NOTE_NODE_VAL = 1
 
 func SerializeGraph(keywordMap map[string]keywords.Keyword, notes []notes.Note, lowerBound, upperBound float64) ([]byte, error) {
+	// func SerializeGraph(keywordMap map[string]keywords.Keyword, notes []notes.Note, lowerBound, upperBound float64) (Graph, error) {
 	nodes := []NodeJSON{}
 	links := []LinkJSON{}
 
@@ -63,12 +65,13 @@ func SerializeGraph(keywordMap map[string]keywords.Keyword, notes []notes.Note, 
 		})
 
 		// Link notes to keywords
-		for keywordID := range note.Weights {
+		for keywordID, wgt := range note.Weights {
 			keyword, exists := keywordMap[keywordID]
 			if exists && keyword.Weight >= lowerBound {
 				links = append(links, LinkJSON{
 					Source: noteID,
 					Target: keyword.Keyword,
+					Value:  wgt,
 				})
 			}
 		}
@@ -84,5 +87,6 @@ func SerializeGraph(keywordMap map[string]keywords.Keyword, notes []notes.Note, 
 		return nil, err
 	}
 
+	// return graph, nil
 	return jsonData, nil
 }

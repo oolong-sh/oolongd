@@ -58,13 +58,14 @@ func handleGetNote(w http.ResponseWriter, r *http.Request) {
 // 'POST /note' endpoint handler creates a note file (and any missing directories) corresponding to input path
 // Expected request body: { "path": "/path/to/note", "content", "full note contents to write" }
 func handleCreateNote(w http.ResponseWriter, r *http.Request) {
-	log.Println("Request received:", r.Method, r.URL, r.Host, r.Body)
+	log.Println("Request received:", r.Method, r.URL, r.Host)
 
 	// parse request body
 	var req createUpdateRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Failed to decode request body", 400)
 	}
+	log.Println("Request body: ", req)
 
 	// check if path before file exists, then check if file exists
 	if e, err := exists(req.Path); err != nil {
@@ -95,13 +96,14 @@ func handleCreateNote(w http.ResponseWriter, r *http.Request) {
 // It will create files that do not exist, but will not create directories
 // Expected request body: { "path": "/path/to/note", "content", "full note contents to write" }
 func handleUpdateNote(w http.ResponseWriter, r *http.Request) {
-	log.Println("Request received:", r.Method, r.URL, r.Host, r.Body)
+	log.Println("Request received:", r.Method, r.URL, r.Host)
 
 	// parse request body
 	var req createUpdateRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Failed to decode request body", 400)
 	}
+	log.Println("Request body: ", req)
 
 	// write contents to file
 	if err := os.WriteFile(req.Path, []byte(req.Content), 0666); err != nil {

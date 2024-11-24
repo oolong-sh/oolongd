@@ -2,6 +2,7 @@ package notes
 
 import (
 	"encoding/json"
+	"math"
 
 	"github.com/oolong-sh/oolong/internal/documents"
 )
@@ -29,12 +30,19 @@ func DocumentsToNotes(documents map[string]*documents.Document) []Note {
 	threshold := 2.0
 
 	for k, v := range documents {
+		weightSum := 0.0
 		weights := map[string]float64{}
+
+		// set weight values
 		for k, v := range v.Weights {
 			if v > threshold {
 				weights[k] = v
+				weightSum += v * v
 			}
 		}
+
+		// normalize resulting weights
+		normalizeWeights(weights, math.Sqrt(weightSum))
 
 		notes = append(notes, Note{
 			Path:    k,
@@ -43,4 +51,10 @@ func DocumentsToNotes(documents map[string]*documents.Document) []Note {
 	}
 
 	return notes
+}
+
+func normalizeWeights(m map[string]float64, sum float64) {
+	for k, v := range m {
+		m[k] = v / sum
+	}
 }

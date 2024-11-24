@@ -3,13 +3,9 @@ package state
 import (
 	"fmt"
 	"log"
-	"os"
 
 	"github.com/oolong-sh/oolong/internal/documents"
-	"github.com/oolong-sh/oolong/internal/graph"
-	"github.com/oolong-sh/oolong/internal/keywords"
 	"github.com/oolong-sh/oolong/internal/linking/ngrams"
-	"github.com/oolong-sh/oolong/internal/notes"
 )
 
 type OolongState struct {
@@ -113,18 +109,21 @@ func (s *StateManager) updateState(docs []*documents.Document) {
 	//
 
 	// TODO: add threshold filtering params to these functions (use config)
-	kw := keywords.NGramsToKeywordsMap(s.state.NGrams)
-	notes := notes.DocumentsToNotes(s.state.Documents)
+	// kw := keywords.NGramsToKeywordsMap(s.state.NGrams)
+	// notes := notes.DocumentsToNotes(s.state.Documents)
 
-	dat, err := graph.SerializeGraph(kw, notes, 0.1, 80)
-	if err != nil {
-		panic(err)
-	}
+	// REFACTOR: store graph json in state field to make it available on request earlier?
+	// - this is probably a good idea
+	//
+	// dat, err := graph.SerializeGraph(kw, notes, 0.1, 80)
+	// if err != nil {
+	// 	panic(err)
+	// }
 
 	// TEST: remove json output later
-	if err := os.WriteFile("graph.json", dat, 0644); err != nil {
-		panic(err)
-	}
+	// if err := os.WriteFile("graph.json", dat, 0644); err != nil {
+	// 	panic(err)
+	// }
 
 	log.Println("State update complete.")
 }
