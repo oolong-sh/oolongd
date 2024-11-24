@@ -1,9 +1,9 @@
 package api
 
 import (
+	"fmt"
 	"log"
 	"net/http"
-	"slices"
 
 	"github.com/oolong-sh/oolong/internal/graph"
 	"github.com/oolong-sh/oolong/internal/keywords"
@@ -11,22 +11,15 @@ import (
 	"github.com/oolong-sh/oolong/internal/state"
 )
 
-var allowedOrigins = []string{
-	"http://localhost:8000",
-}
-
 func handleGetGraph(w http.ResponseWriter, r *http.Request) {
 	log.Println("Request received:", r.Method, r.URL, r.Host)
 	w.Header().Set("Content-Type", "application/json")
-	origin := r.Header.Get("Origin")
 
-	// check if the origin is whitelisted
-	if !slices.Contains(allowedOrigins, origin) {
-		log.Println("Requesting client not in allow list. Origin:", origin)
-		http.Error(w, "Request origin not in allow list", http.StatusForbidden)
-		return
+	// CORS handling
+	if err := checkOrigin(w, r); err != nil {
+		log.Println(err)
+		http.Error(w, fmt.Sprintln(err), 500)
 	}
-	w.Header().Set("Access-Control-Allow-Origin", origin)
 
 	// get snapshot of current state
 	s := state.State()
@@ -37,7 +30,7 @@ func handleGetGraph(w http.ResponseWriter, r *http.Request) {
 
 	// serialize graph data
 	// TODO: pass in thresholds (with request? or with config?)
-	data, err := graph.SerializeGraph(kw, notes, 0.1, 80)
+	data, err := graph.SerializeGraph(kw, notes)
 	if err != nil {
 		http.Error(w, "Error serializing graph data", 500)
 	}

@@ -90,11 +90,3 @@ func FilterMeaningfulNGrams(ngmap map[string]*NGram, minDF int, maxDF int, minAv
 	}
 	return out
 }
-
-type Doc interface {
-	// get
-}
-
-// TODO:
-func NormalizeDocumentWeights() {
-}

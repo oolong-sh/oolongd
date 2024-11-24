@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -19,6 +20,12 @@ type createUpdateRequest struct {
 func handleGetNotes(w http.ResponseWriter, r *http.Request) {
 	log.Println("Request received:", r.Method, r.URL, r.Host)
 
+	// CORS handling
+	if err := checkOrigin(w, r); err != nil {
+		log.Println(err)
+		http.Error(w, fmt.Sprintln(err), 500)
+	}
+
 	s := state.State()
 	data := []string{}
 	for k := range s.Documents {
@@ -32,6 +39,12 @@ func handleGetNotes(w http.ResponseWriter, r *http.Request) {
 // 'GET /note?path=<path>' endpoint handler gets note contents corresponding to input path
 func handleGetNote(w http.ResponseWriter, r *http.Request) {
 	log.Println("Request received:", r.Method, r.URL, r.Host)
+
+	// CORS handling
+	if err := checkOrigin(w, r); err != nil {
+		log.Println(err)
+		http.Error(w, fmt.Sprintln(err), 500)
+	}
 
 	path := r.URL.Query().Get("path")
 	if path == "" {
@@ -59,6 +72,12 @@ func handleGetNote(w http.ResponseWriter, r *http.Request) {
 // Expected request body: { "path": "/path/to/note", "content", "full note contents to write" }
 func handleCreateNote(w http.ResponseWriter, r *http.Request) {
 	log.Println("Request received:", r.Method, r.URL, r.Host)
+
+	// CORS handling
+	if err := checkOrigin(w, r); err != nil {
+		log.Println(err)
+		http.Error(w, fmt.Sprintln(err), 500)
+	}
 
 	// parse request body
 	var req createUpdateRequest
@@ -98,6 +117,12 @@ func handleCreateNote(w http.ResponseWriter, r *http.Request) {
 func handleUpdateNote(w http.ResponseWriter, r *http.Request) {
 	log.Println("Request received:", r.Method, r.URL, r.Host)
 
+	// CORS handling
+	if err := checkOrigin(w, r); err != nil {
+		log.Println(err)
+		http.Error(w, fmt.Sprintln(err), 500)
+	}
+
 	// parse request body
 	var req createUpdateRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -116,6 +141,12 @@ func handleUpdateNote(w http.ResponseWriter, r *http.Request) {
 // 'Delete /note?path=/path/to/note' endpoint handler deletess a note file based on query input
 func handleDeleteNote(w http.ResponseWriter, r *http.Request) {
 	log.Println("Request received:", r.Method, r.URL, r.Host)
+
+	// CORS handling
+	if err := checkOrigin(w, r); err != nil {
+		log.Println(err)
+		http.Error(w, fmt.Sprintln(err), 500)
+	}
 
 	path := r.URL.Query().Get("path")
 	if path == "" {

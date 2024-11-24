@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"path/filepath"
 
+	"github.com/oolong-sh/oolong/internal/config"
 	"github.com/oolong-sh/oolong/internal/keywords"
 	"github.com/oolong-sh/oolong/internal/notes"
 )
@@ -37,15 +38,18 @@ func clamp(value, min, max float64) float64 {
 
 const NOTE_NODE_VAL = 1
 
-func SerializeGraph(keywordMap map[string]keywords.Keyword, notes []notes.Note, lowerBound, upperBound float64) ([]byte, error) {
-	// func SerializeGraph(keywordMap map[string]keywords.Keyword, notes []notes.Note, lowerBound, upperBound float64) (Graph, error) {
+func SerializeGraph(keywordMap map[string]keywords.Keyword, notes []notes.Note) ([]byte, error) {
+	thresholds := config.WeightThresholds()
+	minThresh := thresholds.MinNodeWeight
+	upperBound := thresholds.MaxNodeWeight
+
 	nodes := []NodeJSON{}
 	links := []LinkJSON{}
 
 	for _, keyword := range keywordMap {
 		// Only add nodes above the minimum threshold
-		if keyword.Weight >= lowerBound {
-			clampedWeight := clamp(keyword.Weight, lowerBound, upperBound)
+		if keyword.Weight >= minThresh {
+			clampedWeight := clamp(keyword.Weight, minThresh, upperBound)
 			nodes = append(nodes, NodeJSON{
 				ID:   keyword.Keyword,
 				Name: keyword.Keyword,
@@ -67,7 +71,7 @@ func SerializeGraph(keywordMap map[string]keywords.Keyword, notes []notes.Note, 
 		// Link notes to keywords
 		for keywordID, wgt := range note.Weights {
 			keyword, exists := keywordMap[keywordID]
-			if exists && keyword.Weight >= lowerBound {
+			if exists && keyword.Weight >= minThresh {
 				links = append(links, LinkJSON{
 					Source: noteID,
 					Target: keyword.Keyword,

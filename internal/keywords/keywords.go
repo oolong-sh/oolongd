@@ -3,6 +3,7 @@ package keywords
 import (
 	"encoding/json"
 
+	"github.com/oolong-sh/oolong/internal/config"
 	"github.com/oolong-sh/oolong/internal/linking/ngrams"
 )
 
@@ -23,38 +24,37 @@ func SerializeNGrams(ngmap map[string]*ngrams.NGram) ([]byte, error) {
 	return b, nil
 }
 
-// TODO: parameterize filtering threshold (maybe a percentage?)
-func NGramsToKeywords(ngmap map[string]*ngrams.NGram) []Keyword {
-	// keywords := make([]keyword, len(ngmap))
-	keywords := []Keyword{}
-	threshold := 8.0
+func NGramsToKeywordsMap(ngmap map[string]*ngrams.NGram) map[string]Keyword {
+	keywords := map[string]Keyword{}
+	minThresh := config.WeightThresholds().MinNodeWeight
 
 	for k, v := range ngmap {
 		w := v.Weight()
 
-		if w > threshold {
-			keywords = append(keywords, Keyword{
+		if w > minThresh {
+			keywords[k] = Keyword{
 				Keyword: k,
 				Weight:  w,
-			})
+			}
 		}
 	}
 
 	return keywords
 }
 
-func NGramsToKeywordsMap(ngmap map[string]*ngrams.NGram) map[string]Keyword {
-	keywords := map[string]Keyword{}
-	threshold := 8.0
+// Note: NGramsToKeywords is being used
+func NGramsToKeywords(ngmap map[string]*ngrams.NGram) []Keyword {
+	keywords := []Keyword{}
+	minThresh := config.WeightThresholds().MinNodeWeight
 
 	for k, v := range ngmap {
 		w := v.Weight()
 
-		if w > threshold {
-			keywords[k] = Keyword{
+		if w > minThresh {
+			keywords = append(keywords, Keyword{
 				Keyword: k,
 				Weight:  w,
-			}
+			})
 		}
 	}
 

@@ -16,7 +16,6 @@ var cfg = config.OolongConfig{
 	NotesDirPaths:     []string{"../../examples/data"},
 	NGramRange:        []int{1, 2, 3},
 	AllowedExtensions: []string{".md", ".tex", ".typ", ".txt"},
-	PluginPaths:       []string{},
 	IgnoreDirectories: []string{".templates", ".git"},
 }
 
@@ -29,7 +28,6 @@ func TestReadNotesDirs(t *testing.T) {
 	conf.NotesDirPaths = cfg.NotesDirPaths
 	conf.NGramRange = cfg.NGramRange
 	conf.AllowedExtensions = cfg.AllowedExtensions
-	conf.PluginPaths = cfg.PluginPaths
 	conf.IgnoreDirectories = cfg.IgnoreDirectories
 
 	// TODO: actual tests with an example data directory

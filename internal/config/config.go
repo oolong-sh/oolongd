@@ -14,19 +14,33 @@ type OolongConfig struct {
 	NotesDirPaths     []string `toml:"note_directories"`
 	NGramRange        []int    `toml:"ngram_range"`
 	AllowedExtensions []string `toml:"allowed_extensions"`
-	PluginPaths       []string `toml:"plugin_paths"`
 	IgnoreDirectories []string `toml:"ignored_directories"`
 	StopWords         []string `toml:"stop_words"`
+
+	PluginsConfig OolongPluginConfig `toml:"plugins"`
+	GraphConfig   OolongGraphConfig  `toml:"graph"`
+}
+
+type OolongPluginConfig struct {
+	PluginPaths []string `toml:"plugin_paths"`
+}
+
+type OolongGraphConfig struct {
+	MinNodeWeight float64 `toml:"min_node_weight"`
+	MaxNodeWeight float64 `toml:"max_node_weight"`
+	MinLinkWeight float64 `toml:"min_link_weight"`
+	// TODO: max link weight (call it a cap?)
 }
 
 func Config() *OolongConfig { return &cfg }
 
-func NotesDirPaths() []string      { return cfg.NotesDirPaths }
-func NGramRange() []int            { return cfg.NGramRange }
-func AllowedExtensions() []string  { return cfg.AllowedExtensions }
-func PluginPaths() []string        { return cfg.PluginPaths }
-func IgnoredDirectories() []string { return cfg.IgnoreDirectories }
-func StopWords() []string          { return cfg.StopWords }
+func NotesDirPaths() []string             { return cfg.NotesDirPaths }
+func NGramRange() []int                   { return cfg.NGramRange }
+func AllowedExtensions() []string         { return cfg.AllowedExtensions }
+func PluginPaths() []string               { return cfg.PluginsConfig.PluginPaths }
+func IgnoredDirectories() []string        { return cfg.IgnoreDirectories }
+func StopWords() []string                 { return cfg.StopWords }
+func WeightThresholds() OolongGraphConfig { return cfg.GraphConfig }
 
 // TODO: file watcher for config file, reload on change
 

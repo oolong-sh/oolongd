@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"math"
 
+	"github.com/oolong-sh/oolong/internal/config"
 	"github.com/oolong-sh/oolong/internal/documents"
 )
 
@@ -24,10 +25,9 @@ func SerializeDocuments(documents map[string]*documents.Document) ([]byte, error
 	return b, nil
 }
 
-// TODO: parameterize filtering threshold (maybe as a percentage?)
 func DocumentsToNotes(documents map[string]*documents.Document) []Note {
 	notes := []Note{}
-	threshold := 2.0
+	minThresh := config.WeightThresholds().MinLinkWeight
 
 	for k, v := range documents {
 		weightSum := 0.0
@@ -35,7 +35,7 @@ func DocumentsToNotes(documents map[string]*documents.Document) []Note {
 
 		// set weight values
 		for k, v := range v.Weights {
-			if v > threshold {
+			if v > minThresh {
 				weights[k] = v
 				weightSum += v * v
 			}

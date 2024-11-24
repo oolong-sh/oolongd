@@ -9,16 +9,31 @@ note_directories = [
 # Subdirectory patterns to exclude from the file watcher
 ignored_directories = [
     ".git",
+    ".templates",
+    "target",
 ]
 
 # Whitelist of file extensions to use in linking
 allowed_extensions = [
     ".md",
+    ".mdx",
     ".tex",
     ".typ",
 ]
 
+# Additional stop words
+stop_words = [
+    "idx",
+]
+
 # List of plugins (lua files) to load
+[plugins]
 plugin_paths = [
     "./scripts/daily_note.lua",
 ]
+
+
+[graph]
+min_node_weight = 8.0
+max_node_weight = 80.0
+min_link_weight = 2.0
