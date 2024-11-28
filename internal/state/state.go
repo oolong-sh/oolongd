@@ -104,10 +104,9 @@ func (s *StateManager) updateState(docs []*documents.Document) {
 	// if err := os.WriteFile("./meaningful-ngrams.csv", b, 0666); err != nil {
 	// 	panic(err)
 	// }
-	// //  TODO: add threshold filtering params to these functions (use config)
 	// kw := keywords.NGramsToKeywordsMap(s.state.NGrams)
 	// notes := notes.DocumentsToNotes(s.state.Documents)
-	// dat, err := graph.SerializeGraph(kw, notes, 0.1, 80)
+	// dat, err := graph.SerializeGraph(kw, notes)
 	// if err != nil {
 	// 	panic(err)
 	// }

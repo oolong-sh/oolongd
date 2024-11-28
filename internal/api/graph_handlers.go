@@ -19,6 +19,7 @@ func handleGetGraph(w http.ResponseWriter, r *http.Request) {
 	if err := checkOrigin(w, r); err != nil {
 		log.Println(err)
 		http.Error(w, fmt.Sprintln(err), 500)
+		return
 	}
 
 	// get snapshot of current state
@@ -29,7 +30,6 @@ func handleGetGraph(w http.ResponseWriter, r *http.Request) {
 	notes := notes.DocumentsToNotes(s.Documents)
 
 	// serialize graph data
-	// TODO: pass in thresholds (with request? or with config?)
 	data, err := graph.SerializeGraph(kw, notes)
 	if err != nil {
 		http.Error(w, "Error serializing graph data", 500)

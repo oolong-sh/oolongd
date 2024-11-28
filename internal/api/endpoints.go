@@ -9,6 +9,8 @@ import (
 func SpawnServer() {
 	mux := http.NewServeMux()
 
+	// TODO: add some sort of JWT system for better security
+
 	// graph endpoints
 	mux.HandleFunc("GET /graph", handleGetGraph)
 
@@ -18,10 +20,6 @@ func SpawnServer() {
 	mux.HandleFunc("POST /note", handleCreateNote)
 	mux.HandleFunc("PUT /note", handleUpdateNote)
 	mux.HandleFunc("DELETE /note", handleDeleteNote)
-
-	// keyword endpoints?
-
-	// plugin endpoints? (probably not these outside of official ones)
 
 	// start server
 	log.Println("Starting server on :11975...")

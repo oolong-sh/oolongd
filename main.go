@@ -14,7 +14,7 @@ var daemonFlag = flag.Bool("no-daemon", false, "Run Oolong in no-daemon mode (no
 
 func main() {
 	// read in config
-	if err := config.Setup("~/.config/oolong.toml"); err != nil {
+	if err := config.Setup(); err != nil {
 		panic(err)
 	}
 
