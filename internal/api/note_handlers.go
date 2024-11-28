@@ -24,6 +24,7 @@ func handleGetNotes(w http.ResponseWriter, r *http.Request) {
 	if err := checkOrigin(w, r); err != nil {
 		log.Println(err)
 		http.Error(w, fmt.Sprintln(err), 500)
+		return
 	}
 
 	s := state.State()
@@ -44,6 +45,7 @@ func handleGetNote(w http.ResponseWriter, r *http.Request) {
 	if err := checkOrigin(w, r); err != nil {
 		log.Println(err)
 		http.Error(w, fmt.Sprintln(err), 500)
+		return
 	}
 
 	path := r.URL.Query().Get("path")
@@ -77,6 +79,7 @@ func handleCreateNote(w http.ResponseWriter, r *http.Request) {
 	if err := checkOrigin(w, r); err != nil {
 		log.Println(err)
 		http.Error(w, fmt.Sprintln(err), 500)
+		return
 	}
 
 	// parse request body
@@ -121,6 +124,7 @@ func handleUpdateNote(w http.ResponseWriter, r *http.Request) {
 	if err := checkOrigin(w, r); err != nil {
 		log.Println(err)
 		http.Error(w, fmt.Sprintln(err), 500)
+		return
 	}
 
 	// parse request body
@@ -146,6 +150,7 @@ func handleDeleteNote(w http.ResponseWriter, r *http.Request) {
 	if err := checkOrigin(w, r); err != nil {
 		log.Println(err)
 		http.Error(w, fmt.Sprintln(err), 500)
+		return
 	}
 
 	path := r.URL.Query().Get("path")

@@ -3,6 +3,7 @@ package lexer_test
 import (
 	"fmt"
 	"io"
+	"os"
 	"slices"
 	"strings"
 	"testing"
@@ -14,7 +15,10 @@ import (
 var cfg config.OolongConfig
 
 func init() {
-	if err := config.Setup("../../../examples/oolong.toml"); err != nil {
+	if err := os.Setenv("OOLONG_CONFIG_PATH", "../../../examples/oolong.toml"); err != nil {
+		panic(err)
+	}
+	if err := config.Setup(); err != nil {
 		panic(err)
 	}
 }

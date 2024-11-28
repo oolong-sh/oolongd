@@ -24,10 +24,17 @@ func runNotesDirsWatcher(dirs ...string) error {
 
 	dirIgnores := config.IgnoredDirectories()
 
+	files := []string{}
 	for _, dir := range dirs {
+		if _, err := os.Stat(dir); err != nil {
+			log.Printf("Error creating watcher on directory '%s': %v\n", dir, err)
+			continue
+		}
+
 		// TODO: add oolong ignore system to blacklist certain subdirs/files
 		if err = filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
 			if !d.IsDir() {
+				files = append(files, path)
 				return nil
 			}
 
@@ -50,6 +57,13 @@ func runNotesDirsWatcher(dirs ...string) error {
 		}
 	}
 
+	// run initial server synchronization
+	go func(files []string) {
+		if err := Sync(files...); err != nil {
+			log.Printf("Failed to synchronize files %s: %v\n", files, err)
+		}
+	}(files)
+
 	// watcher handler
 	for {
 		select {
@@ -66,6 +80,12 @@ func runNotesDirsWatcher(dirs ...string) error {
 				// write event is sent on write start, wait 500ms for write to finish
 				time.Sleep(500)
 
+				go func(file string) {
+					if err := Sync(file); err != nil {
+						log.Printf("Failed to synchronize file %s: %v\n", file, err)
+					}
+				}(event.Name)
+
 				// re-read document
 				documents.ReadDocuments(event.Name)
 
@@ -77,9 +97,12 @@ func runNotesDirsWatcher(dirs ...string) error {
 				// - need to be careful with remove event as editors use it when writing files
 				// - state removal needs to also remove ngrams
 				// - should only trigger update on file deletions
+				// TODO: sync handling
 
 			case event.Has(fsnotify.Create):
 				log.Println("Created file/directory", event.Name)
+
+				// TODO: sync handling?
 
 				if info, err := os.Stat(event.Name); err == nil {
 					if info.IsDir() {

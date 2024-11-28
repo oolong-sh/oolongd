@@ -2,13 +2,14 @@ package config
 
 import (
 	"os"
-	"os/user"
-	"path/filepath"
 
 	"github.com/BurntSushi/toml"
+	"github.com/oolong-sh/sync"
 )
 
 var cfg OolongConfig
+
+type OolongSyncConfig sync.SyncConfig
 
 type OolongConfig struct {
 	NotesDirPaths     []string `toml:"note_directories"`
@@ -19,6 +20,7 @@ type OolongConfig struct {
 
 	PluginsConfig OolongPluginConfig `toml:"plugins"`
 	GraphConfig   OolongGraphConfig  `toml:"graph"`
+	SyncConfig    OolongSyncConfig   `toml:"sync"`
 }
 
 type OolongPluginConfig struct {
@@ -40,12 +42,12 @@ func PluginPaths() []string               { return cfg.PluginsConfig.PluginPaths
 func IgnoredDirectories() []string        { return cfg.IgnoreDirectories }
 func StopWords() []string                 { return cfg.StopWords }
 func WeightThresholds() OolongGraphConfig { return cfg.GraphConfig }
+func SyncConfig() OolongSyncConfig        { return cfg.SyncConfig }
 
 // TODO: file watcher for config file, reload on change
 
-func Setup(configPath string) error {
-	var err error
-	configPath, err = expand(configPath)
+func Setup() error {
+	configPath, err := findConfigPath()
 	if err != nil {
 		panic(err)
 	}
@@ -71,16 +73,4 @@ func Setup(configPath string) error {
 	// TODO: set default values for thresholds if not set
 
 	return nil
-}
-
-func expand(path string) (string, error) {
-	if len(path) == 0 || path[0] != '~' {
-		return path, nil
-	}
-
-	usr, err := user.Current()
-	if err != nil {
-		return "", err
-	}
-	return filepath.Join(usr.HomeDir, path[1:]), nil
 }
