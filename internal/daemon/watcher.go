@@ -25,6 +25,11 @@ func runNotesDirsWatcher(dirs ...string) error {
 	dirIgnores := config.IgnoredDirectories()
 
 	for _, dir := range dirs {
+		if _, err := os.Stat(dir); err != nil {
+			log.Printf("Error creating watcher on directory '%s': %v\n", dir, err)
+			continue
+		}
+
 		// TODO: add oolong ignore system to blacklist certain subdirs/files
 		if err = filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
 			if !d.IsDir() {

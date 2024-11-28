@@ -4,6 +4,7 @@ import (
 	"errors"
 	"io/fs"
 	"log"
+	"os"
 	"path/filepath"
 	"slices"
 	"sync"
@@ -41,6 +42,11 @@ func ReadNotesDirs() error {
 
 	docs := []*Document{}
 	for _, dir := range config.NotesDirPaths() {
+		if _, err := os.Stat(dir); err != nil {
+			log.Printf("Error reading directory '%s': %v\n", dir, err)
+			continue
+		}
+
 		// extract all note file paths from notes directory
 		paths := []string{}
 		// TODO: add oolong ignore system to blacklist certain subdirs/files
