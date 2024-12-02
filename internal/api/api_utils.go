@@ -10,6 +10,7 @@ import (
 // TODO: whitelist native app and web urls
 var allowedOrigins = []string{
 	"http://localhost:8000",
+	"http://localhost:5173",
 }
 
 func checkOrigin(w http.ResponseWriter, r *http.Request) error {
