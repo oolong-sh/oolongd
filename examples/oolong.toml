@@ -23,14 +23,12 @@ allowed_extensions = [
 
 # Additional stop words
 stop_words = [
-    "idx",
+    "hello",
 ]
 
-# List of plugins (lua files) to load
+# List of plugins (lua files) to load -- not recommended
 [plugins]
-plugin_paths = [
-    "./scripts/daily_note.lua",
-]
+plugin_paths = [ "./scripts/daily_note.lua" ]
 
 [graph]
 min_node_weight = 4.0
@@ -42,6 +40,6 @@ min_link_weight = 0.1
 #
 [sync]
 host = "127.0.0.1" # replace with your server hostname/ip
-user = "patrick" # rpelace with your server username
+user = "your_username" # replace with your server username
 port = 22 # server ssh port
-private_key_path = "/home/patrick/.ssh/id_ed25519" # replace with your private key path
+private_key_path = "/home/<your_username>/.ssh/<your_private_key_file>" # replace with your private key path
