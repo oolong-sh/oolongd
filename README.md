@@ -94,7 +94,7 @@ ignored_directories = [
 allowed_extensions = [
     ".md",
     ".mdx",
-    ".txt"
+    ".txt",
     ".tex",
     ".typ",
 ]
