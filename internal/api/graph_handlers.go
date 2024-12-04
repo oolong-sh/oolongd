@@ -40,7 +40,4 @@ func handleGetGraph(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error encoding graph data", 500)
 		return
 	}
-	// if err := json.NewEncoder(w).Encode(data); err != nil {
-	// 	http.Error(w, "Error encoding graph data", 500)
-	// }
 }

@@ -50,7 +50,6 @@ func SerializeGraph(keywordMap map[string]keywords.Keyword, notes []notes.Note) 
 	nodes := []NodeJSON{}
 	links := []LinkJSON{}
 
-	// TODO: node groups
 	for _, keyword := range keywordMap {
 		// Only add nodes above the minimum threshold
 		if keyword.Weight >= minThresh {
