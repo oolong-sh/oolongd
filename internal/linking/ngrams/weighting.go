@@ -58,15 +58,12 @@ func (ng *NGram) updateWeight() {
 	w := 0.0
 	df := 0.01
 
-	// TODO: these numbers are subject to change
-	// - document and count adjustments are too high for n=1
+	// NOTE: these numbers are subject to change
 	ladj := math.Min(0.12*float64(len(ng.keyword)), 1.2)                 // length adjustment
 	cadj := math.Min(0.08*float64(ng.n)*float64(ng.globalCount), 1.5)    // count adjustment
 	dadj := math.Min(0.08*float64(ng.n)*float64(len(ng.documents)), 1.8) // document occurence adjustment
-	// TODO: heavily prefer count / len(dg.documents) > 1
-	// cdadj := math.Min(0.5*float64(ng.globalCount)/float64(len(ng.documents)), 2)
 
-	adjustment := ladj * cadj * nadj[ng.n] * dadj // * cdadj
+	adjustment := ladj * cadj * nadj[ng.n] * dadj
 
 	for _, nginfo := range ng.documents {
 		// documentWeight will be bm25 or tf-idf before this point
@@ -79,7 +76,6 @@ func (ng *NGram) updateWeight() {
 	ng.globalWeight = w * adjustment / df
 }
 
-// TODO: maybe get rid of this function?
 func FilterMeaningfulNGrams(ngmap map[string]*NGram, minDF int, maxDF int, minAvgTFIDF float64) []string {
 	var out []string
 	for k, ng := range ngmap {

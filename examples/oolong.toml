@@ -32,8 +32,16 @@ plugin_paths = [
     "./scripts/daily_note.lua",
 ]
 
-
 [graph]
-min_node_weight = 8.0
+min_node_weight = 4.0
 max_node_weight = 80.0
 min_link_weight = 0.1
+
+#
+# NOTE: do not include the following section if you do not want to use cloud sync
+#
+[sync]
+host = "127.0.0.1" # replace with your server hostname/ip
+user = "patrick" # rpelace with your server username
+port = 22 # server ssh port
+private_key_path = "/home/patrick/.ssh/id_ed25519" # replace with your private key path
