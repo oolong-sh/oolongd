@@ -26,6 +26,11 @@ func SpawnServer() {
 	mux.HandleFunc("PUT /note", handleUpdateNote)
 	mux.HandleFunc("DELETE /note", handleDeleteNote)
 
+	// pinning endpoints
+	mux.HandleFunc("GET /pins", handleGetPinnedNotes)
+	mux.HandleFunc("POST /pins", handleAddPinnedNote)
+	mux.HandleFunc("DELETE /pins", handleDeletePinnedNote)
+
 	// start server
 	log.Println("Starting server on :11975...")
 	if err := http.ListenAndServe(":11975", mux); err != nil {
