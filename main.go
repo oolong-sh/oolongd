@@ -5,6 +5,7 @@ import (
 
 	"github.com/oolong-sh/oolong/internal/config"
 	"github.com/oolong-sh/oolong/internal/daemon"
+	"github.com/oolong-sh/oolong/internal/db"
 	"github.com/oolong-sh/oolong/internal/documents"
 	"github.com/oolong-sh/oolong/internal/linking/ngrams"
 	"github.com/oolong-sh/oolong/internal/state"
@@ -28,6 +29,11 @@ func main() {
 	if err := documents.ReadNotesDirs(); err != nil {
 		panic(err)
 	}
+
+	if err := db.InitializeDB(); err != nil {
+		panic(err)
+	}
+	defer db.CloseDB()
 
 	// go plugins.InitPlugins()
 
