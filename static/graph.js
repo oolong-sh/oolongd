@@ -28,6 +28,7 @@ function styleGraphData(graphData) {
 
 let graphInstance = null;
 let mode = "2d";
+let modeFlag = false;
 
 async function loadGraphData() {
   try {
@@ -59,6 +60,7 @@ async function getDefaultMode() {
   try {
     let response = await fetch(`${API_BASE_URL}/config/default-graph-mode`);
     let data = response.json();
+    modeFlag = true;
     return data;
   } catch (error) {
     console.error("Error fetching config data:", error);
@@ -73,7 +75,9 @@ async function initGraph() {
     graphInstance._destructor();
   }
 
-  mode = await getDefaultMode();
+  if (!modeFlag) {
+    mode = await getDefaultMode();
+  }
 
   graphContainer.innerHTML = "";
 
@@ -84,11 +88,15 @@ async function initGraph() {
       .graphData(graphData)
       .backgroundColor("#24211e")
       .onNodeClick(clickHandler);
+    document.getElementById("2d-button").classList.add("active");
+    document.getElementById("3d-button").classList.remove("active");
   } else if (mode === "3d") {
     graphInstance = ForceGraph3D()(graphContainer)
       .graphData(graphData)
       .backgroundColor("#24211e")
       .onNodeClick(clickHandler);
+    document.getElementById("3d-button").classList.add("active");
+    document.getElementById("2d-button").classList.remove("active");
   }
 }
 

@@ -1,9 +1,16 @@
 package config
 
 import (
+	"errors"
+	"fmt"
+	"log"
 	"os"
+	"path/filepath"
+	"strings"
+	"time"
 
 	"github.com/BurntSushi/toml"
+	"github.com/fsnotify/fsnotify"
 	"github.com/oolong-sh/sync"
 )
 
@@ -54,13 +61,22 @@ func WeightThresholds() OolongGraphConfig { return cfg.GraphConfig }
 func GraphMode() string                   { return cfg.GraphConfig.DefaultMode }
 func SyncConfig() OolongSyncConfig        { return cfg.SyncConfig }
 
-// TODO: file watcher for config file, reload on change
-
 func Setup() error {
+	// CHANGE: for hot-reloading, only one config path location should be supported (~/.config/oolong/oolong.toml)
 	configPath, err := findConfigPath()
 	if err != nil {
 		panic(err)
 	}
+
+	readConfig(configPath)
+
+	go initWatcher(configPath)
+
+	return nil
+}
+
+func readConfig(configPath string) {
+	fmt.Println("Parsing configuration:", configPath)
 
 	contents, err := os.ReadFile(configPath)
 	if err != nil {
@@ -81,6 +97,43 @@ func Setup() error {
 	}
 
 	// TODO: set default values for thresholds if not set
+}
 
-	return nil
+func initWatcher(configPath string) error {
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		return err
+	}
+	defer watcher.Close()
+
+	if err := watcher.Add(filepath.Dir(configPath)); err != nil {
+		return err
+	}
+
+	for {
+		select {
+		case event, ok := <-watcher.Events:
+			if !ok {
+				log.Println("Watcher event channel returned bad result.")
+				return errors.New("Invalid watcher errors channel value.")
+			}
+
+			if !strings.Contains(event.Name, configPath) {
+				time.Sleep(500)
+				continue
+			} else if !event.Has(fsnotify.Write) {
+				time.Sleep(500)
+				continue
+			}
+
+			// write event is sent on write start, wait 500ms for write to finish
+			time.Sleep(500)
+			readConfig(configPath)
+		case err, ok := <-watcher.Errors:
+			if !ok {
+				return errors.New("Invalid watcher errors channel value.")
+			}
+			log.Println("error:", err)
+		}
+	}
 }
