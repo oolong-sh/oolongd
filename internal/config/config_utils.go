@@ -30,8 +30,8 @@ func findConfigPath() (string, error) {
 
 func checkDefaultLocations() (string, error) {
 	configPaths := []string{
-		"~/.config/oolong.toml",
 		"~/.config/oolong/oolong.toml",
+		"~/.config/oolong.toml",
 		"~/oolong.toml",
 		"~/.oolong.toml",
 		"/etc/oolong/oolong.toml",
