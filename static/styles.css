@@ -1,0 +1,65 @@
+:root {
+    --dark-brown: #24211E;
+    --green: #77824A;
+    --dark-green: #444A2B;
+    --tan: #D7C484;
+    --orange: #BB7844;
+    --dark-orange: #B36B42;
+    --teal: #5F865F;
+    --yellow: #C9A654;
+    --red: #B3664D;
+    --dark-brown-alt: #3d342c;
+    --darker-brown: #1c1a18;
+
+    --color-background: var(--dark-brown);
+    --color-background-muted: var(--dark-brown-alt);
+    --color-foreground: var(--tan);
+    --color-foreground-muted: var(--dark-green);
+
+    --color-neutral: var(--dark-brown-alt);
+    --color-neutral-alt: var(--yellow);
+    --color-primary: var(--green);
+    --color-primary-alt: var(--orange);
+
+    --transition-time: 0.3s;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    color: var(--color-foreground);
+}
+
+canvas {
+    display: block;
+}
+
+.graph-wrapper {
+    position: relative;
+    height: 100vh;
+    background-color: var(--color-background);
+}
+
+.graph-mode-selector {
+    position: absolute;
+    bottom: 1em;
+    left: 1em;
+    overflow: hidden;
+}
+
+.graph-mode-selector button {
+    padding: 0.5em 1em;
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    background-color: var(--color-background);
+    transition: background-color var(--transition-time);
+    color: var(--color-foreground);
+    margin-right: 0.5em;
+    border: 0.2em solid var(--color-neutral);
+    border-radius: 0.5em;
+}
+
+.graph-mode-selector button:hover,
+.graph-mode-selector button.active {
+    background-color: var(--color-neutral);
+}
