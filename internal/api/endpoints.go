@@ -26,6 +26,7 @@ func SpawnServer() {
 	mux.HandleFunc("POST /note", handleCreateNote)
 	mux.HandleFunc("PUT /note", handleUpdateNote)
 	mux.HandleFunc("DELETE /note", handleDeleteNote)
+	mux.HandleFunc("GET /open/note", handleOpenNote)
 
 	// start server
 	log.Println("Starting server on :11975...")

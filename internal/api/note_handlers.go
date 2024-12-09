@@ -2,12 +2,15 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 
+	"github.com/oolong-sh/oolong/internal/config"
 	"github.com/oolong-sh/oolong/internal/state"
 )
 
@@ -58,7 +61,7 @@ func handleGetNote(w http.ResponseWriter, r *http.Request) {
 	b, err := os.ReadFile(path)
 	if err != nil {
 		log.Println(err)
-		http.Error(w, "Could not read file '"+path+"'", 500)
+		http.Error(w, "Could not read file '"+path+"'", 400)
 		return
 	}
 
@@ -168,4 +171,37 @@ func handleDeleteNote(w http.ResponseWriter, r *http.Request) {
 
 	// NOTE: this function may need to call the update function due to files no longer existing
 	// - check this case in state, this may require substantial logic missing there
+}
+
+// 'GET /open/note?path=/path/to/note.md' opens the specified not file using the command specified in oolong.toml
+func handleOpenNote(w http.ResponseWriter, r *http.Request) {
+	log.Println("Request received:", r.Method, r.URL, r.Host)
+
+	path := r.URL.Query().Get("path")
+	if path == "" {
+		http.Error(w, "Path parameter not specified ", http.StatusBadRequest)
+		return
+	}
+
+	if e, err := exists(path); err != nil {
+		log.Println(err)
+		http.Error(w, "Error checking path", 500)
+		return
+	} else if !e {
+		log.Printf("File %s does not exist.\n", path)
+		http.Error(w, "Note file not found exists", 400)
+		return
+	}
+
+	// open file in editor (use command defined in config)
+	openCommand := append(config.OpenCommand(), path)
+	cmd := exec.Command(openCommand[0], openCommand[1:]...)
+	if errors.Is(cmd.Err, exec.ErrDot) {
+		cmd.Err = nil
+	}
+
+	if err := cmd.Run(); err != nil {
+		log.Println(err)
+		http.Error(w, "Error opening file in editor.", 500)
+	}
 }

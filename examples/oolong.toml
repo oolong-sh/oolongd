@@ -1,6 +1,3 @@
-# Range of NGram sizes to use for keyword linking
-ngram_range = [ 1, 2, 3 ]
-
 # List of directories to read into Oolong
 note_directories = [
     "~/notes",
@@ -20,6 +17,15 @@ allowed_extensions = [
     ".tex",
     ".typ",
 ]
+
+# Command to run when open endpoint it called (a note node is clicked on the graph)
+open_command = [ "code" ]
+# Note: All arguments MUST be separated into separate strings
+# (more complicated commands should likely be written into a script)
+# i.e. 'open_command = ["tmux", "neww", "-c", "shell", "nvim"]'
+
+# Range of NGram sizes to use for keyword linking
+ngram_range = [ 1, 2, 3 ]
 
 # Additional stop words
 stop_words = [

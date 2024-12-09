@@ -40,10 +40,18 @@ async function loadGraphData() {
   }
 }
 
-// TODO: click handler
-function clickHandler(node) {
+async function clickHandler(node) {
   if (node.group === "note") {
     console.log(`Clicked on node: ${node.name}`);
+    try {
+      const resp = await fetch(`open/note?path=${encodeURIComponent(node.id)}`);
+      if (!resp.ok) {
+        throw new Error("Failed to open file");
+      }
+      alert("Open file in editor.");
+    } catch (err) {
+      console.log(err);
+    }
   }
 }
 

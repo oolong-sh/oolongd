@@ -53,6 +53,7 @@ func SerializeGraph(keywordMap map[string]keywords.Keyword, notes []notes.Note) 
 	for _, keyword := range keywordMap {
 		// Only add nodes above the minimum threshold
 		if keyword.Weight >= minThresh {
+			// TODO: clamp weights == min to 1 after filtering
 			clampedWeight := clamp(keyword.Weight, minThresh, upperBound)
 			nodes = append(nodes, NodeJSON{
 				ID:    keyword.Keyword,

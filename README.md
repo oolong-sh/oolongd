@@ -16,7 +16,7 @@ cd oolongd
 go build
 ```
 
-TODO: Docker image, Nix and Homebrew packages?
+<!-- TODO: Docker image, Nix and Homebrew packages? -->
 
 ## Usage
 
@@ -27,10 +27,10 @@ oolong
 ```
 
 The service will run in the background, and the API will be accessible on port 11975.
+The graph can be opened by navigating to [http://localhost:11975](http://localhost:11975), and clicking on note nodes will open the file in an editor of your choice (as defined in config).
 
-To view the constructed graph and use the web editor see [oolong-web](https://github.com/oolong-sh/oolong-web).
 
-(Serving up a copy of the graph from the backend is a WIP)
+To use the Oolong web editor see [oolong-web](https://github.com/oolong-sh/oolong-web). (The web editor also includes a graph integration)
 
 ## Configuration
 
@@ -41,11 +41,27 @@ Oolong looks for a configuration file at `~/.config/oolong.toml`
 
 | Option | Description | Recommended |
 |--------|-------------|---------|
-| `ngram_range` | Range of NGram sizes to use for keyword linking | `[1, 2, 3]` |
 | `note_directories` | List of directories to use with Oolong | `["~/notes"]` |
 | `ignored_directories` | Subdirectories to exclude from reading and linking | `[".git"]` |
 | `allowed_extensions` | Whitelist of file extensions to use in linking | `[".md", ".txt", ".mdx", ".tex", ".typ"]` |
+| `open_command` | Command to run when clicking a graph node | `["code"]` (See below for more details) |
+| `ngram_range` | Range of NGram sizes to use for keyword linking | `[1, 2, 3]` |
 | `stop_words` | Additional stop words to exclude from keyword extraction | `[]` |
+
+
+The `open_command` option is used by the graph to allow you to open a clicked note in an editor of your choice.
+
+For example, to open a note in VSCode use `open_command = ["code"]`
+
+To use your system default editor:
+- Linux: `open_command = ["xdg-open"]`
+- MacOS: `open_command = ["open"]`
+- Windows: `open_command = ["start"]`
+
+For more situations where you want to run a more complex command, separate consecutive arguments:
+- `open_command = ["tmux", "neww", "-c", "shell", "nvim"]` (opens Neovim in a new tmux window in the active session)
+
+<!-- TODO: example using a script -->
 
 
 **Graph Settings** (required):
@@ -75,9 +91,6 @@ Oolong looks for a configuration file at `~/.config/oolong.toml`
 ### Example Configuration
 
 ```toml
-# Range of NGram sizes to use for keyword linking
-ngram_range = [ 1, 2, 3 ]
-
 # List of directories to read into Oolong
 note_directories = [
     "~/notes",
@@ -99,10 +112,18 @@ allowed_extensions = [
     ".typ",
 ]
 
+# Command to run when open endpoint it called (a note node is clicked on the graph)
+# Note: All arguments MUST be separated into separate strings (see config for more details)
+open_command = [ "code" ]
+
+
+# Range of NGram sizes to use for keyword linking
+ngram_range = [ 1, 2, 3 ]
+
+# Extra stop words to exclude from NGram generation
 stop_words = [
     "hello",
 ]
-
 
 # graph settings (required)
 [graph]

@@ -13,10 +13,13 @@ type OolongSyncConfig sync.SyncConfig
 
 type OolongConfig struct {
 	NotesDirPaths     []string `toml:"note_directories"`
-	NGramRange        []int    `toml:"ngram_range"`
 	AllowedExtensions []string `toml:"allowed_extensions"`
 	IgnoreDirectories []string `toml:"ignored_directories"`
-	StopWords         []string `toml:"stop_words"`
+	OpenCommand       []string `toml:"open_command"`
+
+	// TODO: move these things to a "linker" config section
+	NGramRange []int    `toml:"ngram_range"`
+	StopWords  []string `toml:"stop_words"`
 
 	PluginsConfig OolongPluginConfig `toml:"plugins"`
 	GraphConfig   OolongGraphConfig  `toml:"graph"`
@@ -33,9 +36,14 @@ type OolongGraphConfig struct {
 	MinLinkWeight float64 `toml:"min_link_weight"`
 }
 
+type OolongEditorConfig struct {
+	// TODO: web editor related config (themes?)
+}
+
 func Config() *OolongConfig { return &cfg }
 
 func NotesDirPaths() []string             { return cfg.NotesDirPaths }
+func OpenCommand() []string               { return cfg.OpenCommand }
 func NGramRange() []int                   { return cfg.NGramRange }
 func AllowedExtensions() []string         { return cfg.AllowedExtensions }
 func PluginPaths() []string               { return cfg.PluginsConfig.PluginPaths }
