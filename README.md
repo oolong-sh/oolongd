@@ -71,6 +71,7 @@ For more situations where you want to run a more complex command, separate conse
 | min_node_weight | Minimum NGram weight to allow to show up in the graph | `2.0` (Increase to a larger number for large note directories) |
 | max_node_weight | Maximum size of a node in the graph (larger values are clamped to this size) | `10.0` |
 | min_link_weight | The minimum allowed link strength between a note and NGram | `0.1` (Increase to a larger number (0.2-0.3) for larger note directories) |
+| default_mode | Default graph mode (2d/3d) | `"3d"` |
 
 
 **Cloud Synchronization Settings** (optional):
@@ -130,6 +131,7 @@ stop_words = [
 min_node_weight = 8.0
 max_node_weight = 12.0
 min_link_weight = 0.2
+default_mode = "3d"
 
 # optional plugins section (not currently recommended)
 [plugins]

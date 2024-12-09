@@ -19,6 +19,7 @@ func SpawnServer() {
 	mux.HandleFunc("GET /config", handleGetConfig)
 	mux.HandleFunc("GET /config/graph", handleGetGraphConfig)
 	mux.HandleFunc("GET /config/note-dirs", handleGetNoteDirsConfig)
+	mux.HandleFunc("GET /config/default-graph-mode", handleGetGraphView)
 
 	// note endpoints
 	mux.HandleFunc("GET /notes", handleGetNotes)

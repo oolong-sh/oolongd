@@ -34,6 +34,7 @@ type OolongGraphConfig struct {
 	MinNodeWeight float64 `toml:"min_node_weight"`
 	MaxNodeWeight float64 `toml:"max_node_weight"`
 	MinLinkWeight float64 `toml:"min_link_weight"`
+	DefaultMode   string  `toml:"default_mode"`
 }
 
 type OolongEditorConfig struct {
@@ -50,6 +51,7 @@ func PluginPaths() []string               { return cfg.PluginsConfig.PluginPaths
 func IgnoredDirectories() []string        { return cfg.IgnoreDirectories }
 func StopWords() []string                 { return cfg.StopWords }
 func WeightThresholds() OolongGraphConfig { return cfg.GraphConfig }
+func GraphMode() string                   { return cfg.GraphConfig.DefaultMode }
 func SyncConfig() OolongSyncConfig        { return cfg.SyncConfig }
 
 // TODO: file watcher for config file, reload on change

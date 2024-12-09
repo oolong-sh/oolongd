@@ -55,12 +55,25 @@ async function clickHandler(node) {
   }
 }
 
+async function getDefaultMode() {
+  try {
+    let response = await fetch(`${API_BASE_URL}/config/default-graph-mode`);
+    let data = response.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching config data:", error);
+    return "2d";
+  }
+}
+
 async function initGraph() {
   const graphContainer = document.getElementById("graph-container");
 
   if (graphInstance) {
     graphInstance._destructor();
   }
+
+  mode = await getDefaultMode();
 
   graphContainer.innerHTML = "";
 
