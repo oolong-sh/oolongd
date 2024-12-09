@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-// DOC:
+// spawn the oolong api server
 func SpawnServer() {
 	mux := http.NewServeMux()
 
@@ -13,11 +13,13 @@ func SpawnServer() {
 
 	// graph endpoints
 	mux.HandleFunc("GET /graph", handleGetGraph)
+	mux.Handle("/", http.FileServer(http.Dir("./static")))
 
 	// config endpoints
 	mux.HandleFunc("GET /config", handleGetConfig)
 	mux.HandleFunc("GET /config/graph", handleGetGraphConfig)
 	mux.HandleFunc("GET /config/note-dirs", handleGetNoteDirsConfig)
+	mux.HandleFunc("GET /config/default-graph-mode", handleGetGraphView)
 
 	// note endpoints
 	mux.HandleFunc("GET /notes", handleGetNotes)
@@ -25,6 +27,7 @@ func SpawnServer() {
 	mux.HandleFunc("POST /note", handleCreateNote)
 	mux.HandleFunc("PUT /note", handleUpdateNote)
 	mux.HandleFunc("DELETE /note", handleDeleteNote)
+	mux.HandleFunc("GET /open/note", handleOpenNote)
 
 	// start server
 	log.Println("Starting server on :11975...")
