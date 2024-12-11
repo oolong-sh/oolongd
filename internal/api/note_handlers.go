@@ -10,8 +10,8 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/oolong-sh/oolong/internal/db"
 	"github.com/oolong-sh/oolong/internal/config"
+	"github.com/oolong-sh/oolong/internal/db"
 	"github.com/oolong-sh/oolong/internal/state"
 	"go.etcd.io/bbolt"
 )

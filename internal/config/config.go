@@ -31,6 +31,8 @@ type OolongConfig struct {
 	PluginsConfig OolongPluginConfig `toml:"plugins"`
 	GraphConfig   OolongGraphConfig  `toml:"graph"`
 	SyncConfig    OolongSyncConfig   `toml:"sync"`
+
+	PinningEnabled *bool `toml:"pinning_enabled"`
 }
 
 type OolongPluginConfig struct {
@@ -60,6 +62,12 @@ func StopWords() []string                 { return cfg.StopWords }
 func WeightThresholds() OolongGraphConfig { return cfg.GraphConfig }
 func GraphMode() string                   { return cfg.GraphConfig.DefaultMode }
 func SyncConfig() OolongSyncConfig        { return cfg.SyncConfig }
+func PinningEnabled() bool {
+	if cfg.PinningEnabled != nil {
+		return *cfg.PinningEnabled
+	}
+	return true
+}
 
 func Setup() error {
 	// CHANGE: for hot-reloading, only one config path location should be supported (~/.config/oolong/oolong.toml)
@@ -97,6 +105,11 @@ func readConfig(configPath string) {
 	}
 
 	// TODO: set default values for thresholds if not set
+
+	if cfg.PinningEnabled == nil {
+		defaultValue := true
+		cfg.PinningEnabled = &defaultValue
+	}
 }
 
 func initWatcher(configPath string) error {

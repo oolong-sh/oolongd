@@ -30,9 +30,13 @@ func main() {
 		panic(err)
 	}
 
-	if err := db.InitializeDB(); err != nil {
-		panic(err)
-	}
+	go func() {
+		if config.PinningEnabled() {
+			if err := db.InitializeDB(); err != nil {
+				panic(err)
+			}
+		}
+	}()
 	defer db.CloseDB()
 
 	// go plugins.InitPlugins()
@@ -42,4 +46,5 @@ func main() {
 	if !*daemonFlag {
 		daemon.Run()
 	}
+
 }

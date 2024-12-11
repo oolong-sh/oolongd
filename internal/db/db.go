@@ -3,6 +3,7 @@ package db
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 
 	"go.etcd.io/bbolt"
 )
@@ -18,7 +19,12 @@ func InitializeDB() error {
 		return err
 	}
 
-	db_path := filepath.Join(homeDir, ".config", "oolong", "oolong.db")
+	var db_path string
+	if runtime.GOOS == "windows" {
+		db_path = filepath.Join(homeDir, "AppData", "Local", "oolong", "oolong.db")
+	} else {
+		db_path = filepath.Join(homeDir, ".local", "share", "oolong", "oolong.db")
+	}
 
 	err = os.MkdirAll(filepath.Dir(db_path), 0755)
 	if err != nil {
