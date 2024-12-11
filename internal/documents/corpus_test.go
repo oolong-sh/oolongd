@@ -13,8 +13,10 @@ import (
 
 var cfg = config.OolongConfig{
 	// NotesDirPaths:     []string{"~/notes"},
-	NotesDirPaths:     []string{"../../examples/data"},
-	NGramRange:        []int{1, 2, 3},
+	NotesDirPaths: []string{"../../examples/data"},
+	LinkerConfig: config.OolongLinkerConfig{
+		NGramRange: []int{1, 2, 3},
+	},
 	AllowedExtensions: []string{".md", ".tex", ".typ", ".txt"},
 	IgnoreDirectories: []string{".templates", ".git"},
 }
@@ -26,16 +28,14 @@ func init() {
 func TestReadNotesDirs(t *testing.T) {
 	conf := config.Config()
 	conf.NotesDirPaths = cfg.NotesDirPaths
-	conf.NGramRange = cfg.NGramRange
+	conf.LinkerConfig.NGramRange = cfg.LinkerConfig.NGramRange
 	conf.AllowedExtensions = cfg.AllowedExtensions
 	conf.IgnoreDirectories = cfg.IgnoreDirectories
 
 	// TODO: actual tests with an example data directory
-	fmt.Println("reading?? -- gets lock")
 	if err := documents.ReadNotesDirs(); err != nil {
 		t.Fatalf("Failed to read notes directories: %v\n", err)
 	}
-	fmt.Println("finished reading -- getting read lock")
 	s := state.State()
 
 	b := append([]byte{}, []byte("ngram,weight,count\n")...)

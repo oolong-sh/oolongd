@@ -11,6 +11,7 @@ import (
 	"github.com/oolong-sh/oolong/internal/notes"
 )
 
+// FIX: calculate document weight with non-partial bm25f, use that to define node size
 type NodeJSON struct {
 	ID    string  `json:"id"`
 	Name  string  `json:"name"`
