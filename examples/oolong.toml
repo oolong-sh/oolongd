@@ -24,17 +24,16 @@ open_command = [ "code" ]
 # (more complicated commands should likely be written into a script)
 # i.e. 'open_command = ["tmux", "neww", "-c", "shell", "nvim"]'
 
+[linker]
 # Range of NGram sizes to use for keyword linking
 ngram_range = [ 1, 2, 3 ]
 
 # Additional stop words
-stop_words = [
-    "hello",
-]
+stop_words = [ "hello" ]
 
 [graph]
-min_node_weight = 4.0
-max_node_weight = 80.0
+min_node_weight = 2.0
+max_node_weight = 10.0
 min_link_weight = 0.1
 default_mode = "3d"
 

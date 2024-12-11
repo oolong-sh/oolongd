@@ -45,8 +45,6 @@ Oolong looks for a configuration file at `~/.config/oolong.toml`
 | `ignored_directories` | Subdirectories to exclude from reading and linking | `[".git"]` |
 | `allowed_extensions` | Whitelist of file extensions to use in linking | `[".md", ".txt", ".mdx", ".tex", ".typ"]` |
 | `open_command` | Command to run when clicking a graph node | `["code"]` (See below for more details) |
-| `ngram_range` | Range of NGram sizes to use for keyword linking | `[1, 2, 3]` |
-| `stop_words` | Additional stop words to exclude from keyword extraction | `[]` |
 
 
 The `open_command` option is used by the graph to allow you to open a clicked note in an editor of your choice.
@@ -64,14 +62,21 @@ For more situations where you want to run a more complex command, separate conse
 <!-- TODO: example using a script -->
 
 
-**Graph Settings** (required):
+**Linker Config** (optional -- falls back to defaults)
 
-| Option | Description | Recommended |
+| Option | Description | Default |
+|--------|-------------|-------------|
+| `ngram_range` | Range of NGram sizes to use for keyword linking | `[1, 2, 3]` |
+| `stop_words` | Additional stop words to exclude from keyword extraction | `[]` |
+
+**Graph Settings** (optional -- falls back to defaults):
+
+| Option | Description | Default |
 |--------|-------------|-------------|
 | min_node_weight | Minimum NGram weight to allow to show up in the graph | `2.0` (Increase to a larger number for large note directories) |
 | max_node_weight | Maximum size of a node in the graph (larger values are clamped to this size) | `10.0` |
 | min_link_weight | The minimum allowed link strength between a note and NGram | `0.1` (Increase to a larger number (0.2-0.3) for larger note directories) |
-| default_mode | Default graph mode (2d/3d) | `"3d"` |
+| default_mode | Default graph mode (2d/3d) | `"2d"` |
 
 
 **Cloud Synchronization Settings** (optional):
@@ -117,26 +122,19 @@ allowed_extensions = [
 # Note: All arguments MUST be separated into separate strings (see config for more details)
 open_command = [ "code" ]
 
-
+[linker]
 # Range of NGram sizes to use for keyword linking
 ngram_range = [ 1, 2, 3 ]
 
 # Extra stop words to exclude from NGram generation
-stop_words = [
-    "hello",
-]
+stop_words = [ "hello" ]
 
 # graph settings (required)
 [graph]
-min_node_weight = 8.0
+min_node_weight = 2.0
 max_node_weight = 12.0
-min_link_weight = 0.2
+min_link_weight = 0.1
 default_mode = "3d"
-
-# optional plugins section (not currently recommended)
-[plugins]
-# List of plugins (lua files) to load
-plugin_paths = [ "./scripts/daily_note.lua" ]
 
 #
 # NOTE: do not include the following section if you do not want to use cloud sync
@@ -146,4 +144,10 @@ host = "127.0.0.1" # replace with your server hostname/ip
 user = "your_username" # replace with your server username
 port = 22 # server ssh port
 private_key_path = "/home/<your_username>/.ssh/<your_ssh_key_path>" # replace with your private key path
+
+
+# optional plugins section (not currently recommended)
+[plugins]
+# List of plugins (lua files) to load
+plugin_paths = [ "./scripts/daily_note.lua" ]
 ```
