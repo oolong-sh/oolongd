@@ -35,9 +35,9 @@ func main() {
 			if err := db.InitializeDB(); err != nil {
 				panic(err)
 			}
+			defer db.CloseDB()
 		}
 	}()
-	defer db.CloseDB()
 
 	// go plugins.InitPlugins()
 
@@ -46,5 +46,4 @@ func main() {
 	if !*daemonFlag {
 		daemon.Run()
 	}
-
 }
