@@ -13,7 +13,11 @@ type Note struct {
 	Weights map[string]float64 `json:"weights"`
 }
 
-// DOC:
+type SearchNote struct {
+	Weights map[string]float64 `json:"weights"`
+	// TODO: ngram in-document counts
+}
+
 func SerializeDocuments(documents map[string]*documents.Document) ([]byte, error) {
 	notes := DocumentsToNotes(documents)
 
@@ -23,6 +27,18 @@ func SerializeDocuments(documents map[string]*documents.Document) ([]byte, error
 	}
 
 	return b, nil
+}
+
+func SearchByNote(s string, documents map[string]*documents.Document) (SearchNote, bool) {
+	doc, exist := documents[s]
+	if !exist {
+		return SearchNote{}, false
+	}
+
+	// TODO: update to also contain ngram counts
+	return SearchNote{
+		Weights: doc.Weights,
+	}, true
 }
 
 func DocumentsToNotes(documents map[string]*documents.Document) []Note {

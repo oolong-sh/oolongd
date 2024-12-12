@@ -12,7 +12,12 @@ type Keyword struct {
 	Weight  float64 `json:"weight"`
 }
 
-// DOC:
+type SearchKeyword struct {
+	Weight    float64                      `json:"weight"`
+	Count     int                          `json:"count"`
+	Documents map[string]*ngrams.NGramInfo `json:"documents"`
+}
+
 func SerializeNGrams(ngmap map[string]*ngrams.NGram) ([]byte, error) {
 	keywords := NGramsToKeywords(ngmap)
 
@@ -22,6 +27,19 @@ func SerializeNGrams(ngmap map[string]*ngrams.NGram) ([]byte, error) {
 	}
 
 	return b, nil
+}
+
+func SearchByKeyword(s string, ngmap map[string]*ngrams.NGram) (SearchKeyword, bool) {
+	ng, exist := ngmap[s]
+	if !exist {
+		return SearchKeyword{}, false
+	}
+
+	return SearchKeyword{
+		Weight:    ng.Weight(),
+		Count:     ng.Count(),
+		Documents: ng.Documents(),
+	}, true
 }
 
 func NGramsToKeywordsMap(ngmap map[string]*ngrams.NGram) map[string]Keyword {
@@ -42,7 +60,7 @@ func NGramsToKeywordsMap(ngmap map[string]*ngrams.NGram) map[string]Keyword {
 	return keywords
 }
 
-// Note: NGramsToKeywords is being used
+// Note: NGramsToKeywordsMap is being used by the API
 func NGramsToKeywords(ngmap map[string]*ngrams.NGram) []Keyword {
 	keywords := []Keyword{}
 	minThresh := config.WeightThresholds().MinNodeWeight

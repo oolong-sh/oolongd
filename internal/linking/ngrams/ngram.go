@@ -44,8 +44,8 @@ func (ng *NGram) Weight() float64 { return ng.globalWeight }
 func (ng *NGram) Keyword() string { return ng.keyword }
 
 // Non-interface getter methods
-func (ng *NGram) Documents() map[string]*NGramInfo { return ng.documents }
 func (ng *NGram) Count() int                       { return ng.globalCount }
+func (ng *NGram) Documents() map[string]*NGramInfo { return ng.documents }
 
 // func (ng *NGram) IDF() float64                     { return ng.idf }
 

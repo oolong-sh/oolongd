@@ -29,6 +29,10 @@ func SpawnServer() {
 	mux.HandleFunc("DELETE /note", handleDeleteNote)
 	mux.HandleFunc("GET /open/note", handleOpenNote)
 
+	// search endpoints
+	mux.HandleFunc("GET /search/keyword", handleSearchKeyword)
+	mux.HandleFunc("GET /search/note", handleSearchNote)
+
 	// start server
 	log.Println("Starting server on :11975...")
 	if err := http.ListenAndServe(":11975", mux); err != nil {
