@@ -31,12 +31,16 @@ func SpawnServer() {
 	mux.HandleFunc("DELETE /note", handleDeleteNote)
 	mux.HandleFunc("GET /open/note", handleOpenNote)
 
+  // pinning endpoints
 	if config.PinningEnabled() {
-		// pinning endpoints
 		mux.HandleFunc("GET /pins", handleGetPinnedNotes)
 		mux.HandleFunc("POST /pins", handleAddPinnedNote)
 		mux.HandleFunc("DELETE /pins", handleDeletePinnedNote)
 	}
+  
+	// search endpoints
+	mux.HandleFunc("GET /search/keyword", handleSearchKeyword)
+	mux.HandleFunc("GET /search/note", handleSearchNote)
 
 	// start server
 	log.Println("Starting server on :11975...")
