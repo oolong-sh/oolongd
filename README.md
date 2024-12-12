@@ -93,6 +93,12 @@ For more situations where you want to run a more complex command, separate conse
 |--------|-------------|-------------|
 | plugin_paths | List of scripts to load | `[]` |
 
+**Note pinning** (optional):
+
+| Option | Description | Default |
+|--------|-------------|-------------|
+| pinning_enabled | Boolean representing if note pinning is enabled in oolongd | `false` |
+
 
 ### Example Configuration
 
@@ -117,6 +123,9 @@ allowed_extensions = [
     ".tex",
     ".typ",
 ]
+
+# Enables note pinning
+pinning_enabled = true
 
 # Command to run when open endpoint it called (a note node is clicked on the graph)
 # Note: All arguments MUST be separated into separate strings (see config for more details)
