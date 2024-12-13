@@ -45,7 +45,7 @@ Oolong looks for a configuration file at `~/.config/oolong.toml`
 | `ignored_directories` | Subdirectories to exclude from reading and linking | `[".git"]` |
 | `allowed_extensions` | Whitelist of file extensions to use in linking | `[".md", ".txt", ".mdx", ".tex", ".typ"]` |
 | `open_command` | Command to run when clicking a graph node | `["code"]` (See below for more details) |
-
+| `pinning_enabled` | **Optional** boolean indicating if note pinning should be enabled | `false` |
 
 The `open_command` option is used by the graph to allow you to open a clicked note in an editor of your choice.
 
@@ -94,6 +94,7 @@ For more situations where you want to run a more complex command, separate conse
 | plugin_paths | List of scripts to load | `[]` |
 
 
+
 ### Example Configuration
 
 ```toml
@@ -117,6 +118,9 @@ allowed_extensions = [
     ".tex",
     ".typ",
 ]
+
+# Enables note pinning
+pinning_enabled = true
 
 # Command to run when open endpoint it called (a note node is clicked on the graph)
 # Note: All arguments MUST be separated into separate strings (see config for more details)
