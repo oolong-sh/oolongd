@@ -13,6 +13,7 @@ type Keyword struct {
 }
 
 type SearchKeyword struct {
+	Keyword   string                       `json:"keyword"`
 	Weight    float64                      `json:"weight"`
 	Count     int                          `json:"count"`
 	Documents map[string]*ngrams.NGramInfo `json:"documents"`
@@ -36,6 +37,7 @@ func SearchByKeyword(s string, ngmap map[string]*ngrams.NGram) (SearchKeyword, b
 	}
 
 	return SearchKeyword{
+		Keyword:   s,
 		Weight:    ng.Weight(),
 		Count:     ng.Count(),
 		Documents: ng.Documents(),

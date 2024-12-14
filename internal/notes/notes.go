@@ -14,6 +14,7 @@ type Note struct {
 }
 
 type SearchNote struct {
+	Path    string             `json:"path"`
 	Weights map[string]float64 `json:"weights"`
 	// TODO: ngram in-document counts
 }
@@ -37,6 +38,7 @@ func SearchByNote(s string, documents map[string]*documents.Document) (SearchNot
 
 	// TODO: update to also contain ngram counts
 	return SearchNote{
+		Path:    s,
 		Weights: doc.Weights,
 	}, true
 }
@@ -49,7 +51,7 @@ func DocumentsToNotes(documents map[string]*documents.Document) []Note {
 		weightSum := 0.0
 		weights := map[string]float64{}
 
-		// set weight values
+		// Set weight values
 		for k, v := range v.Weights {
 			if v > minThresh {
 				weights[k] = v
