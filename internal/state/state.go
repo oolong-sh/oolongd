@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/oolong-sh/oolong/internal/documents"
-	"github.com/oolong-sh/oolong/internal/linking/ngrams"
+	"github.com/oolong-sh/oolongd/internal/documents"
+	"github.com/oolong-sh/oolongd/internal/linking/ngrams"
 )
 
 type OolongState struct {

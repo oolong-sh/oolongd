@@ -3,12 +3,12 @@ package main
 import (
 	"flag"
 
-	"github.com/oolong-sh/oolong/internal/config"
-	"github.com/oolong-sh/oolong/internal/daemon"
-	"github.com/oolong-sh/oolong/internal/db"
-	"github.com/oolong-sh/oolong/internal/documents"
-	"github.com/oolong-sh/oolong/internal/linking/ngrams"
-	"github.com/oolong-sh/oolong/internal/state"
+	"github.com/oolong-sh/oolongd/internal/config"
+	"github.com/oolong-sh/oolongd/internal/daemon"
+	"github.com/oolong-sh/oolongd/internal/db"
+	"github.com/oolong-sh/oolongd/internal/documents"
+	"github.com/oolong-sh/oolongd/internal/linking/ngrams"
+	"github.com/oolong-sh/oolongd/internal/state"
 )
 
 var daemonFlag = flag.Bool("no-daemon", false, "Run Oolong in no-daemon mode (not recommended)")

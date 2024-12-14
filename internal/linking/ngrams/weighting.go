@@ -3,7 +3,7 @@ package ngrams
 import (
 	"math"
 
-	"github.com/oolong-sh/oolong/internal/linking/lexer"
+	"github.com/oolong-sh/oolongd/internal/linking/lexer"
 )
 
 // Weight adjustment multipliers for NGram sizes

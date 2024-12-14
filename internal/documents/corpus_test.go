@@ -5,10 +5,10 @@ import (
 	"os"
 	"testing"
 
-	"github.com/oolong-sh/oolong/internal/config"
-	"github.com/oolong-sh/oolong/internal/documents"
-	"github.com/oolong-sh/oolong/internal/linking/ngrams"
-	"github.com/oolong-sh/oolong/internal/state"
+	"github.com/oolong-sh/oolongd/internal/config"
+	"github.com/oolong-sh/oolongd/internal/documents"
+	"github.com/oolong-sh/oolongd/internal/linking/ngrams"
+	"github.com/oolong-sh/oolongd/internal/state"
 )
 
 var cfg = config.OolongConfig{

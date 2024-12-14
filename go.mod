@@ -1,4 +1,4 @@
-module github.com/oolong-sh/oolong
+module github.com/oolong-sh/oolongd
 
 go 1.23.2
 

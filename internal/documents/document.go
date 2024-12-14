@@ -5,9 +5,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/oolong-sh/oolong/internal/config"
-	"github.com/oolong-sh/oolong/internal/linking/lexer"
-	"github.com/oolong-sh/oolong/internal/linking/ngrams"
+	"github.com/oolong-sh/oolongd/internal/config"
+	"github.com/oolong-sh/oolongd/internal/linking/lexer"
+	"github.com/oolong-sh/oolongd/internal/linking/ngrams"
 )
 
 // Document type stores lexical tokens and NGrams for a single document

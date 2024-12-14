@@ -5,9 +5,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/oolong-sh/oolong/internal/keywords"
-	"github.com/oolong-sh/oolong/internal/notes"
-	"github.com/oolong-sh/oolong/internal/state"
+	"github.com/oolong-sh/oolongd/internal/keywords"
+	"github.com/oolong-sh/oolongd/internal/notes"
+	"github.com/oolong-sh/oolongd/internal/state"
 )
 
 func handleSearchKeyword(w http.ResponseWriter, r *http.Request) {

@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/oolong-sh/oolong/internal/config"
+	"github.com/oolong-sh/oolongd/internal/config"
 )
 
 func handleGetConfig(w http.ResponseWriter, r *http.Request) {

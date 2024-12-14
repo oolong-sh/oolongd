@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/fsnotify/fsnotify"
-	"github.com/oolong-sh/oolong/internal/config"
-	"github.com/oolong-sh/oolong/internal/documents"
+	"github.com/oolong-sh/oolongd/internal/config"
+	"github.com/oolong-sh/oolongd/internal/documents"
 )
 
 // Initialize and run file update watcher for notes directories

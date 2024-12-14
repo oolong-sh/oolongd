@@ -5,7 +5,7 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/oolong-sh/oolong/internal/linking/lexer"
+	"github.com/oolong-sh/oolongd/internal/linking/lexer"
 )
 
 // NGram type used throughout linking package

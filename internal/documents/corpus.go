@@ -9,7 +9,7 @@ import (
 	"slices"
 	"sync"
 
-	"github.com/oolong-sh/oolong/internal/config"
+	"github.com/oolong-sh/oolongd/internal/config"
 )
 
 // State updater function depends on injected function from state to avoid circular dependency

@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oolong-sh/oolong/internal/config"
-	"github.com/oolong-sh/oolong/internal/linking/lexer"
+	"github.com/oolong-sh/oolongd/internal/config"
+	"github.com/oolong-sh/oolongd/internal/linking/lexer"
 )
 
 var cfg config.OolongConfig

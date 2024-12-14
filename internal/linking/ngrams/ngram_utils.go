@@ -4,7 +4,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/oolong-sh/oolong/internal/linking/lexer"
+	"github.com/oolong-sh/oolongd/internal/linking/lexer"
 )
 
 // add ngram to map, update if it already appears

@@ -6,9 +6,9 @@ import (
 	"math"
 	"path/filepath"
 
-	"github.com/oolong-sh/oolong/internal/config"
-	"github.com/oolong-sh/oolong/internal/keywords"
-	"github.com/oolong-sh/oolong/internal/notes"
+	"github.com/oolong-sh/oolongd/internal/config"
+	"github.com/oolong-sh/oolongd/internal/keywords"
+	"github.com/oolong-sh/oolongd/internal/notes"
 )
 
 // FIX: calculate document weight with non-partial bm25f, use that to define node size

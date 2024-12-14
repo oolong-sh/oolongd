@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/oolong-sh/oolong/internal/config"
+	"github.com/oolong-sh/oolongd/internal/config"
 )
 
 func InitPlugins() {

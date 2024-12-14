@@ -3,8 +3,8 @@ package keywords
 import (
 	"encoding/json"
 
-	"github.com/oolong-sh/oolong/internal/config"
-	"github.com/oolong-sh/oolong/internal/linking/ngrams"
+	"github.com/oolong-sh/oolongd/internal/config"
+	"github.com/oolong-sh/oolongd/internal/linking/ngrams"
 )
 
 type Keyword struct {

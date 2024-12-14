@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/oolong-sh/oolong/internal/config"
+	"github.com/oolong-sh/oolongd/internal/config"
 )
 
 // spawn the oolong api server
@@ -31,13 +31,13 @@ func SpawnServer() {
 	mux.HandleFunc("DELETE /note", handleDeleteNote)
 	mux.HandleFunc("GET /open/note", handleOpenNote)
 
-  // pinning endpoints
+	// pinning endpoints
 	if config.PinningEnabled() {
 		mux.HandleFunc("GET /pins", handleGetPinnedNotes)
 		mux.HandleFunc("POST /pins", handleAddPinnedNote)
 		mux.HandleFunc("DELETE /pins", handleDeletePinnedNote)
 	}
-  
+
 	// search endpoints
 	mux.HandleFunc("GET /search/keyword", handleSearchKeyword)
 	mux.HandleFunc("GET /search/note", handleSearchNote)

@@ -3,7 +3,7 @@ package daemon
 import (
 	"log"
 
-	"github.com/oolong-sh/oolong/internal/config"
+	"github.com/oolong-sh/oolongd/internal/config"
 	"github.com/oolong-sh/sync"
 )
 

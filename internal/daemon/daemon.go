@@ -1,8 +1,8 @@
 package daemon
 
 import (
-	"github.com/oolong-sh/oolong/internal/api"
-	"github.com/oolong-sh/oolong/internal/config"
+	"github.com/oolong-sh/oolongd/internal/api"
+	"github.com/oolong-sh/oolongd/internal/config"
 )
 
 // Launch perpetually running watchers and run application in the background as a daemon
