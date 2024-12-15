@@ -23,7 +23,7 @@ go build
 After defining your configuration in `~/.config/oolong.toml` [See configuration](#configuration), oolongd can be run as follows:
 
 ```sh
-oolong
+oolongd
 ```
 
 The service will run in the background, and the API will be accessible on port 11975.
