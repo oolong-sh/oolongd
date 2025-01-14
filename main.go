@@ -1,6 +1,7 @@
 package main
 
 import (
+	"embed"
 	"flag"
 
 	"github.com/oolong-sh/oolongd/internal/config"
@@ -10,6 +11,9 @@ import (
 	"github.com/oolong-sh/oolongd/internal/linking/ngrams"
 	"github.com/oolong-sh/oolongd/internal/state"
 )
+
+//go:embed static
+var staticFiles embed.FS
 
 var daemonFlag = flag.Bool("no-daemon", false, "Run Oolong in no-daemon mode (not recommended)")
 
@@ -44,6 +48,6 @@ func main() {
 	// run daemon if --no-daemon flag is not passed
 	flag.Parse()
 	if !*daemonFlag {
-		daemon.Run()
+		daemon.Run(staticFiles)
 	}
 }
