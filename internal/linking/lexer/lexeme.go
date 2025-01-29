@@ -21,7 +21,7 @@ const (
 type Zone byte
 
 // Zone enum used in weights calculations
-// (Ordered from most significant to least signficant)
+// (Ordered from most significant to least significant)
 const (
 	H1 Zone = iota
 	H2
@@ -36,10 +36,8 @@ const (
 )
 
 type Lexeme struct {
-	Lemma string // lexical root of unit (i.e. continues -> continue)
-	Value string // lexical unit
-	// Row     int     // row location in file
-	// Col     int     // column location of first character in file
+	Lemma   string  // lexical root of unit (i.e. continues -> continue)
+	Value   string  // lexical unit
 	LexType LexType // type of lexical unit
 	Zone    Zone    // document zone
 }

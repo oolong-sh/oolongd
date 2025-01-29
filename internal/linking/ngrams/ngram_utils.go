@@ -51,21 +51,20 @@ func joinNElements(nTokens []lexer.Lexeme) string {
 		slices.Contains(stopWords, strings.ToLower(nTokens[len(nTokens)-1].Lemma)) {
 		return ""
 	}
-	// for _, t := range nTokens {
-	// 	if slices.Contains(stopWords, string(t.Lemma)) {
-	// 		return ""
-	// 	}
-	// }
 
 	zone := nTokens[0].Zone
 
-	for _, t := range nTokens {
+	for i, t := range nTokens {
 		// return early if token type matches the break system
 		if t.LexType == lexer.Break {
 			return ""
 		}
 
-		// TODO: add handling of different lexeme types (i.e. disallow links)
+		// TODO: add handling of remaining lexeme types (dates)
+		if t.LexType == lexer.URI || t.LexType == lexer.Symbol ||
+			(t.LexType == lexer.Number && (i == 0 || i == len(nTokens)-1)) {
+			return ""
+		}
 
 		// return early if tokens are spread across multiple zones
 		// TODO: allow zone changes from bold/italic -> default (but not h1 -> default)

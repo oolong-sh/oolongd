@@ -1,4 +1,4 @@
-// Lexer is heavily inspired by chewxy's lexer from the lingo project: https://github.com/chewxy/lingo/blob/master/lexer/stateFn.go
+// Lexer is inspired by chewxy's lexer from the lingo project: https://github.com/chewxy/lingo/blob/master/lexer/stateFn.go
 package lexer
 
 import (
@@ -24,9 +24,10 @@ type Lexer struct {
 	row   int
 	col   int
 
-	zone       Zone
-	lemmatizer *golem.Lemmatizer
-	sb         strings.Builder
+	zone        Zone
+	lemmatizer  *golem.Lemmatizer
+	sb          strings.Builder
+	currLexType LexType
 
 	Output []Lexeme
 }
@@ -39,13 +40,14 @@ func New() *Lexer {
 	}
 
 	return &Lexer{
-		pos:        1,
-		start:      1,
-		row:        1,
-		col:        1,
-		zone:       Default,
-		lemmatizer: lemmatizer,
-		Output:     []Lexeme{},
+		pos:         1,
+		start:       1,
+		row:         1,
+		col:         1,
+		zone:        Default,
+		lemmatizer:  lemmatizer,
+		currLexType: Space,
+		Output:      []Lexeme{},
 	}
 }
 
@@ -67,9 +69,8 @@ func (l *Lexer) Lex(r io.Reader) {
 
 		switch {
 		case unicode.IsSpace(r):
-			// TODO:
 			if l.sb.Len() > 0 {
-				l.push(Word)
+				l.push(l.currLexType)
 				l.ignore()
 			}
 			if r == '\n' {
@@ -78,55 +79,61 @@ func (l *Lexer) Lex(r io.Reader) {
 				l.row++
 				l.col = 1
 			}
+			l.currLexType = Space
 		case unicode.IsDigit(r):
-			// TODO: number handling?
+			if l.currLexType == Space {
+				l.currLexType = Number
+			}
+			// TODO: additional number handling? (i.e. Dates?)
 			l.accept()
 		case r == ':':
-			// get this case from lingo
 			if l.peek() == '/' {
-				// l.accept() // accept ':'
-				// l.next()
-				// if l.peek() == '/' {
-				// 	l.accept()
-				// 	return lexURI
-				// }
-				// // otherwise...
-				// l.backup()
-				// // "unaccept". since '/' has a width of 1 we can do the following
-				// l.buf.Truncate(l.buf.Len() - 1)
-			}
-			// fn = lexPunctuation
-			// TODO: possible url handling?
-		case unicode.IsPunct(r):
-			// TODO:
-			switch r {
-			case '_':
 				l.accept()
-			case '-':
-				n := l.peek()
-				switch {
-				case n == eof:
-					l.width = 1
-					l.backup()
-					l.width = 0
-					// t = Symbol
-					// TODO: something?
-				case unicode.IsLetter(n):
+				l.next()
+				if l.peek() == '/' {
+					l.currLexType = URI
 					l.accept()
+				} else {
+					l.sb.Reset()
 				}
-			default:
-				// l.ignore()
+			}
+		case unicode.IsPunct(r):
+			if l.currLexType == Space {
+				l.currLexType = Symbol
+			}
+
+			switch r {
+			// case '_':
+			// TODO: should underscores be allowed as first character?
+			case '-':
+				if l.sb.Len() == 0 {
+					l.ignore()
+				} else {
+					n := l.peek()
+					switch {
+					case n == eof:
+						l.width = 1
+						l.backup()
+						l.width = 0
+					case unicode.IsLetter(n):
+						l.accept()
+					}
+				}
 			}
 		case unicode.IsSymbol(r):
 			// TODO: non-punct processing
 			l.ignore()
 		default:
+			// If no other cases were met, character should be part of a word
+			if l.currLexType != URI {
+				l.currLexType = Word
+			}
 			l.accept()
 		}
 	}
 
 	// Handle any remaining content in the buffer
 	if l.sb.Len() > 0 {
-		l.push(Word) // CHANGE: needs to be able to handle the other types as well
+		l.push(l.currLexType)
 	}
 }
