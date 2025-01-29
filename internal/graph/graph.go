@@ -31,16 +31,6 @@ type Graph struct {
 	Links []LinkJSON `json:"links"`
 }
 
-func clamp(value, min, max float64) float64 {
-	if value < min {
-		return min
-	}
-	if value > max {
-		return max
-	}
-	return value
-}
-
 const NOTE_NODE_VAL = 1
 
 func SerializeGraph(keywordMap map[string]keywords.Keyword, notes []notes.Note) ([]byte, error) {
@@ -54,8 +44,8 @@ func SerializeGraph(keywordMap map[string]keywords.Keyword, notes []notes.Note) 
 	for _, keyword := range keywordMap {
 		// Only add nodes above the minimum threshold
 		if keyword.Weight >= minThresh {
-			// TODO: clamp weights == min to 1 after filtering
-			clampedWeight := clamp(keyword.Weight, minThresh, upperBound)
+			// NOTE: more minimum size tuning could likely be performed here
+			clampedWeight := clamp(keyword.Weight-minThresh, 0.1, upperBound)
 			nodes = append(nodes, NodeJSON{
 				ID:    keyword.Keyword,
 				Name:  keyword.Keyword,
@@ -102,6 +92,16 @@ func SerializeGraph(keywordMap map[string]keywords.Keyword, notes []notes.Note) 
 
 	// return graph, nil
 	return jsonData, nil
+}
+
+func clamp(value, min, max float64) float64 {
+	if value < min {
+		return min
+	}
+	if value > max {
+		return max
+	}
+	return value
 }
 
 func weightToColor(v float64) string {
