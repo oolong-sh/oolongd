@@ -47,10 +47,15 @@ func joinNElements(nTokens []lexer.Lexeme) string {
 	var parts []string
 
 	// check for outer stop words -> skip ngram
-	if slices.Contains(stopWords, strings.ToLower(nTokens[0].Lemma)) ||
-		slices.Contains(stopWords, strings.ToLower(nTokens[len(nTokens)-1].Lemma)) {
-		return ""
+	for _, l := range nTokens {
+		if slices.Contains(stopWords, l.Lemma) {
+			return ""
+		}
 	}
+	// if slices.Contains(stopWords, strings.ToLower(nTokens[0].Lemma)) ||
+	// 	slices.Contains(stopWords, strings.ToLower(nTokens[len(nTokens)-1].Lemma)) {
+	// 	return ""
+	// }
 
 	zone := nTokens[0].Zone
 
